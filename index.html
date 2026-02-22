@@ -10,22 +10,31 @@
 
     <style>
         body { font-family: sans-serif; background: #121212; color: #fff; text-align: center; margin: 0; padding: 20px; -webkit-tap-highlight-color: transparent; }
-        h1 { color: #f39c12; text-transform: uppercase; letter-spacing: 2px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 12px; max-width: 500px; margin: 20px auto; }
-        button { height: 75px; border-radius: 15px; border: none; background: #222; color: #f39c12; font-size: 22px; font-weight: bold; box-shadow: 0 4px #000; cursor: pointer; }
-        button.selecionado { background: #f39c12 !important; color: #fff !important; transform: translateY(4px); box-shadow: 0 0 15px #f39c12; }
-        #status { position: fixed; top: 10px; background: #27ae60; padding: 10px 20px; border-radius: 30px; display: none; font-weight: bold; z-index: 100; }
+        h1 { color: #f39c12; text-transform: uppercase; letter-spacing: 2px; margin: 10px 0; }
+        p { color: #888; font-size: 14px; margin-bottom: 20px; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 12px; max-width: 500px; margin: 0 auto; }
+        
+        /* Botão Normal */
+        button { height: 75px; border-radius: 15px; border: none; background: #222; color: #f39c12; font-size: 22px; font-weight: bold; box-shadow: 0 4px #000; cursor: pointer; transition: 0.3s; }
+        
+        /* Botão em Atendimento (Vermelho) */
+        button.aguardando { background: #e74c3c !important; color: #fff !important; transform: translateY(4px); box-shadow: 0 0 15px #e74c3c; border: 2px solid #fff; }
+        
+        #status { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); background: #27ae60; padding: 10px 20px; border-radius: 30px; display: none; font-weight: bold; z-index: 100; white-space: nowrap; }
     </style>
 </head>
 <body>
 
-    <div id="status">ENVIADO!</div>
+    <div id="status">CHAMADO ENVIADO!</div>
     <h1>GUANABARA</h1>
-    <p>Toque no número para chamar</p>
+    <p>Selecione a m&aacute;quina para atendimento</p>
 
     <div class="grid" id="painel"></div>
 
- <script>
+
+///endereço firebase
+  <script>
 
         const firebaseConfig = {
 
@@ -36,53 +45,58 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // SOM EMBUTIDO (Bipe Curto)
+        // Gerador de Som (Bipe)
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function tocarBipe() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.type = "sine";
-            osc.frequency.setValueAtTime(880, audioCtx.currentTime); // Tom do bipe
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.type = "sine"; osc.frequency.setValueAtTime(880, audioCtx.currentTime);
             gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.1); // Duração de 0.1 segundos
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
         }
 
-        // GERAR BOTÕES
+        // Criar os 85 Botões
         const painel = document.getElementById('painel');
         for (let i = 1; i <= 85; i++) {
             let b = document.createElement('button');
             b.innerText = i;
             b.id = "m-" + i;
-            b.onclick = () => enviar(i);
+            b.onclick = () => enviarChamada(i);
             painel.appendChild(b);
         }
 
-        function enviar(n) {
-            // DESTRAVAR ÁUDIO (Necessário para navegadores bloquearem menos)
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
+        function enviarChamada(n) {
+            const btn = document.getElementById('m-' + n);
             
+            // Impede cliques repetidos enquanto estiver vermelho
+            if (btn.classList.contains('aguardando')) return;
+
             tocarBipe();
+            btn.classList.add('aguardando');
 
-            // Marcar botão
-            document.querySelectorAll('button').forEach(btn => btn.classList.remove('selecionado'));
-            document.getElementById('m-' + n).classList.add('selecionado');
+            // 1. Envia para a FILA no Firebase criando um ID único
+            const referenciaChamada = db.ref('fila').push();
+            referenciaChamada.set({
+                maquina: n,
+                timestamp: Date.now()
+            });
 
-            // Mostrar aviso
+            // 2. Mostra aviso visual no topo
             const st = document.getElementById('status');
             st.innerText = "MÁQUINA " + n + " CHAMADA!";
             st.style.display = "block";
-            setTimeout(() => { st.style.display = "none"; }, 2000);
+            setTimeout(() => { st.style.display = "none"; }, 2500);
 
-            // Enviar Firebase
-            db.ref('atendimento').set({
-                maquina: n,
-                hora: Date.now()
-            });
+            // 3. LIMPEZA AUTOMÁTICA (Após 15 segundos)
+            setTimeout(() => {
+                // Remove a cor vermelha do botão no celular
+                btn.classList.remove('aguardando');
+                
+                // Apaga o registro do Firebase automaticamente
+                referenciaChamada.remove();
+            }, 15000); 
         }
     </script>
 </body>
