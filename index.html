@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    
     <title>Guanabara Atendimento - TV</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -21,25 +24,33 @@
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
             background-color: var(--bg);
             background-image: radial-gradient(circle at center, #1a1a1a 0%, #0a0a0a 100%);
-            color: #fff; margin: 0; padding: 40px 20px; 
+            color: #fff; margin: 0; padding: 20px; 
             display: flex; flex-direction: column; align-items: center; min-height: 100vh;
             overflow-x: hidden;
         }
 
-        h1 { color: var(--primary); text-transform: uppercase; letter-spacing: 8px; margin: 0; font-size: clamp(3em, 8vw, 6em); text-shadow: 0 0 20px rgba(243, 156, 18, 0.3); }
-        header p { color: #aaa; font-size: 1.5em; margin-top: 10px; text-transform: uppercase; text-align: center; }
+        /* Botão de Tela Cheia */
+        #btnFullscreen {
+            position: absolute; top: 10px; right: 10px;
+            background: #333; color: #fff; border: none; padding: 10px;
+            border-radius: 5px; cursor: pointer; font-size: 12px; opacity: 0.5;
+        }
+        #btnFullscreen:hover { opacity: 1; }
+
+        h1 { color: var(--primary); text-transform: uppercase; letter-spacing: 8px; margin: 10px 0 0 0; font-size: clamp(2.5em, 6vw, 5em); text-shadow: 0 0 20px rgba(243, 156, 18, 0.3); }
+        header p { color: #aaa; font-size: 1.2em; margin-top: 5px; text-transform: uppercase; text-align: center; }
 
         .grid { 
-            display: grid; gap: 20px; width: 100%; max-width: 1800px; 
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); 
-            margin-top: 40px; margin-bottom: 100px;
+            display: grid; gap: 15px; width: 100%; max-width: 1800px; 
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); 
+            margin-top: 20px; margin-bottom: 80px;
         }
 
-        button { 
-            aspect-ratio: 1 / 1; border-radius: 15px; border: 2px solid #333; 
-            background: var(--card-bg); color: var(--primary); font-size: 45px; font-weight: 900; 
+        button.maquina { 
+            aspect-ratio: 1 / 1; border-radius: 12px; border: 2px solid #333; 
+            background: var(--card-bg); color: var(--primary); font-size: 42px; font-weight: 900; 
             cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 10px 0 #000; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 0 #000; display: flex; align-items: center; justify-content: center;
         }
 
         button.aguardando { 
@@ -48,18 +59,20 @@
             animation: pulse 1s infinite alternate; z-index: 10;
         }
 
-        @keyframes pulse { 0% { filter: brightness(1); transform: scale(1.05); } 100% { filter: brightness(1.3); transform: scale(1.1); } }
+        @keyframes pulse { 0% { filter: brightness(1); } 100% { filter: brightness(1.3); } }
 
-        #status { position: fixed; top: 40px; background: #27ae60; padding: 20px 60px; border-radius: 100px; display: none; font-weight: bold; font-size: 2em; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 3px solid #fff; }
+        #status { position: fixed; top: 20px; background: #27ae60; padding: 15px 40px; border-radius: 100px; display: none; font-weight: bold; font-size: 1.8em; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 3px solid #fff; }
 
-        #relogio { position: fixed; bottom: 30px; right: 40px; color: var(--primary); font-size: 3em; font-family: monospace; background: rgba(0,0,0,0.8); padding: 10px 30px; border-radius: 20px; border: 1px solid #333; }
+        #relogio { position: fixed; bottom: 20px; right: 20px; color: var(--primary); font-size: 2.5em; font-family: monospace; background: rgba(0,0,0,0.8); padding: 8px 20px; border-radius: 15px; border: 1px solid #333; }
 
-        @media (min-width: 1600px) { .grid { grid-template-columns: repeat(10, 1fr); } }
+        @media (min-width: 1600px) { .grid { grid-template-columns: repeat(12, 1fr); } }
     </style>
 </head>
 <body>
 
+    <button id="btnFullscreen">TELA CHEIA</button>
     <div id="status">ENVIADO!</div>
+    
     <header>
         <h1>GUANABARA</h1>
         <p>Painel de Atendimento</p>
@@ -77,88 +90,67 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Criar botões
+    // Função Tela Cheia
+    document.getElementById('btnFullscreen').onclick = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+            document.getElementById('btnFullscreen').style.display = 'none'; // Some após ativar
+        }
+    };
+
     const painel = document.getElementById('painel');
     for (let i = 1; i <= 85; i++) {
         let b = document.createElement('button');
         b.innerText = i;
         b.id = "m-" + i;
+        b.className = "maquina";
         b.onclick = () => enviarChamada(i);
         painel.appendChild(b);
     }
 
-    // --- SISTEMA DE ÁUDIO MELHORADO ---
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
     function tocarBipeForte() {
         if (audioCtx.state === 'suspended') audioCtx.resume();
-        
-        function emitirSom(tempoInicio, frequencia) {
+        function emitirSom(tempo, freq) {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            
-            osc.type = "sine";
-            osc.frequency.setValueAtTime(frequencia, audioCtx.currentTime + tempoInicio);
-            
-            // VOLUME NO MÁXIMO (1.0)
-            gain.gain.setValueAtTime(0, audioCtx.currentTime + tempoInicio);
-            gain.gain.linearRampToValueAtTime(1.0, audioCtx.currentTime + tempoInicio + 0.01);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + tempoInicio + 0.3);
-            
-            osc.start(audioCtx.currentTime + tempoInicio);
-            osc.stop(audioCtx.currentTime + tempoInicio + 0.3);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime + tempo);
+            gain.gain.setValueAtTime(1.0, audioCtx.currentTime + tempo);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + tempo + 0.3);
+            osc.start(audioCtx.currentTime + tempo);
+            osc.stop(audioCtx.currentTime + tempo + 0.3);
         }
-
-        // Toca dois bipes (bipe-bipe) para chamar mais atenção
-        emitirSom(0, 880);      // Primeiro bipe
-        emitirSom(0.4, 880);    // Segundo bipe após 0.4s
+        emitirSom(0, 880); emitirSom(0.4, 880);
     }
 
     function enviarChamada(n) {
         const btn = document.getElementById('m-' + n);
         if (btn.classList.contains('aguardando')) return;
-
         tocarBipeForte();
-
-        const tempoExpiracao = Date.now() + 20000;
-        db.ref('fila/' + n).set({ 
-            maquina: n, 
-            expiraEm: tempoExpiracao 
-        });
-
+        db.ref('fila/' + n).set({ maquina: n, expiraEm: Date.now() + 15000 });
         const st = document.getElementById('status');
-        st.innerText = `MAQUINA ${n} CHAMADA!`;
+        st.innerText = `MÁQUINA ${n} CHAMADA!`;
         st.style.display = "block";
-        setTimeout(() => { st.style.display = "none"; }, 5000);
+        setTimeout(() => { st.style.display = "none"; }, 3000);
     }
 
-    // TIMER E SINCRONIZAÇÃO
     setInterval(() => {
         const agora = Date.now();
         db.ref('fila').once('value', (snapshot) => {
             const fila = snapshot.val() || {};
             Object.keys(fila).forEach(key => {
-                if (agora > fila[key].expiraEm) {
-                    db.ref('fila/' + key).remove();
-                }
+                if (agora > fila[key].expiraEm) db.ref('fila/' + key).remove();
             });
         });
-
-        const d = new Date();
-        document.getElementById('relogio').innerText = d.toLocaleTimeString('pt-BR');
+        document.getElementById('relogio').innerText = new Date().toLocaleTimeString('pt-BR');
     }, 1000);
 
     db.ref('fila').on('value', (snapshot) => {
         const fila = snapshot.val() || {};
-        for (let i = 1; i <= 85; i++) {
-            document.getElementById('m-' + i).classList.remove('aguardando');
-        }
+        document.querySelectorAll('.maquina').forEach(b => b.classList.remove('aguardando'));
         Object.keys(fila).forEach(key => {
-            const num = fila[key].maquina;
-            const btn = document.getElementById('m-' + num);
+            const btn = document.getElementById('m-' + fila[key].maquina);
             if (btn) btn.classList.add('aguardando');
         });
     });
