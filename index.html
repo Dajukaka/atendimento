@@ -61,7 +61,7 @@
             z-index: 100; box-shadow: 0 5px 20px rgba(0,0,0,0.8); 
         }
 
-        /* RelÛgio para a TV */
+        /* Rel√≥gio para a TV */
         #relogio {
             position: fixed; bottom: 10px; right: 20px; color: #f39c12;
             font-size: 1.5em; font-family: monospace; background: rgba(0,0,0,0.5);
@@ -84,14 +84,14 @@
 
             apiKey: "AIzaSyCJu0tGeJSMt-9HXRVT2Ijsdh-Z1NzJYmg",
 
-            databaseURL: "https://guanabara-atendimento-default-rtdb.firebaseio.com"
+            databaseURL: "https://guanabara-atendimento-default-rtdb.firebaseio.com/"
   
         };
    ///
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // RelÛgio Digital
+        // Rel√≥gio Digital
         function atualizarRelogio() {
             const agora = new Date();
             const h = String(agora.getHours()).padStart(2, '0');
@@ -113,7 +113,7 @@
             osc.start(); osc.stop(audioCtx.currentTime + 0.1);
         }
 
-        // Criar Botıes
+        // Criar Bot√µes
         const painel = document.getElementById('painel');
         for (let i = 1; i <= 85; i++) {
             let b = document.createElement('button');
@@ -145,4 +145,5 @@
         }
     </script>
 </body>
+
 </html>
