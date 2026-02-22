@@ -3,91 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
     <title>Guanabara Atendimento</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <style>
-        body { 
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-            background: #121212; 
-            color: #fff; 
-            margin: 0; 
-            padding: 20px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        h1 { color: #f39c12; margin: 10px 0; font-size: 24px; text-transform: uppercase; letter-spacing: 2px; }
-        p { color: #888; margin-bottom: 25px; font-size: 14px; }
-
-        /* Grade de 85 Botões */
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); 
-            gap: 12px; 
-            width: 100%; 
-            max-width: 500px; 
-            margin-bottom: 50px;
-        }
-
-        /* Estilo dos Botões */
-        button { 
-            height: 65px; 
-            border: none; 
-            border-radius: 12px; 
-            background: #222; 
-            color: #f39c12; 
-            font-size: 20px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            transition: 0.2s; 
-            box-shadow: 0 4px #000;
-        }
-
-        /* Botão quando selecionado */
-        button.selecionado { 
-            background: #f39c12 !important; 
-            color: #fff !important; 
-            transform: translateY(4px); 
-            box-shadow: 0 0 15px rgba(243, 156, 18, 0.7);
-            border: 2px solid #fff;
-        }
-
-        /* Alerta de confirmação no topo */
-        #status { 
-            position: fixed; 
-            top: 20px; 
-            background: #27ae60; 
-            color: white; 
-            padding: 12px 25px; 
-            border-radius: 30px; 
-            display: none; 
-            font-weight: bold; 
-            z-index: 1000;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
+        body { font-family: sans-serif; background: #121212; color: #fff; text-align: center; margin: 0; padding: 20px; -webkit-tap-highlight-color: transparent; }
+        h1 { color: #f39c12; text-transform: uppercase; letter-spacing: 2px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 12px; max-width: 500px; margin: 20px auto; }
+        button { height: 75px; border-radius: 15px; border: none; background: #222; color: #f39c12; font-size: 22px; font-weight: bold; box-shadow: 0 4px #000; cursor: pointer; }
+        button.selecionado { background: #f39c12 !important; color: #fff !important; transform: translateY(4px); box-shadow: 0 0 15px #f39c12; }
+        #status { position: fixed; top: 10px; background: #27ae60; padding: 10px 20px; border-radius: 30px; display: none; font-weight: bold; z-index: 100; }
     </style>
 </head>
 <body>
 
-    <div id="status">CHAMANDO...</div>
-
+    <div id="status">ENVIADO!</div>
     <h1>GUANABARA</h1>
-    <p>Toque no n&uacute;mero da sua m&aacute;quina</p>
-    
-    <audio id="somClique" src="https://www.soundjay.com/buttons/sounds/button-16.mp3" preload="auto"></audio>
+    <p>Toque no número para chamar</p>
 
-    <div class="grid" id="containerBotoes"></div>
+    <div class="grid" id="painel"></div>
 
-<script>
-
-        // CONFIGURAÇÃO DO SEU FIREBASE 
+ <script>
 
         const firebaseConfig = {
 
@@ -95,41 +33,56 @@
 
             databaseURL: "https://guanabara-atendimento-default-rtdb.firebaseio.com"
         };
-        
         firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        const db = firebase.database();
 
-        // Gerar os 85 botões automaticamente
-        const grid = document.getElementById('containerBotoes');
-        for (let i = 1; i <= 85; i++) {
-            let btn = document.createElement('button');
-            btn.innerText = i;
-            btn.id = "btn-" + i;
-            btn.onclick = () => enviarChamada(i);
-            grid.appendChild(btn);
+        // SOM EMBUTIDO (Bipe Curto)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function tocarBipe() {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime); // Tom do bipe
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1); // Duração de 0.1 segundos
         }
 
-        function enviarChamada(num) {
-            // Tocar som
-            const audio = document.getElementById('somClique');
-            audio.currentTime = 0;
-            audio.play();
+        // GERAR BOTÕES
+        const painel = document.getElementById('painel');
+        for (let i = 1; i <= 85; i++) {
+            let b = document.createElement('button');
+            b.innerText = i;
+            b.id = "m-" + i;
+            b.onclick = () => enviar(i);
+            painel.appendChild(b);
+        }
 
-            // Marcar visualmente o botão
-            document.querySelectorAll('button').forEach(b => b.classList.remove('selecionado'));
-            document.getElementById('btn-' + num).classList.add('selecionado');
+        function enviar(n) {
+            // DESTRAVAR ÁUDIO (Necessário para navegadores bloquearem menos)
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            
+            tocarBipe();
 
-            // Mostrar aviso visual
+            // Marcar botão
+            document.querySelectorAll('button').forEach(btn => btn.classList.remove('selecionado'));
+            document.getElementById('m-' + n).classList.add('selecionado');
+
+            // Mostrar aviso
             const st = document.getElementById('status');
-            st.style.display = 'block';
-            st.innerText = 'MÁQUINA ' + num + ' CHAMADA!';
-            setTimeout(() => { st.style.display = 'none'; }, 2500);
+            st.innerText = "MÁQUINA " + n + " CHAMADA!";
+            st.style.display = "block";
+            setTimeout(() => { st.style.display = "none"; }, 2000);
 
-            // Enviar para o banco de dados
-            database.ref('atendimento').set({
-                maquina: num,
-                timestamp: Date.now()
-            }).catch(err => alert("Erro: " + err.message));
+            // Enviar Firebase
+            db.ref('atendimento').set({
+                maquina: n,
+                hora: Date.now()
+            });
         }
     </script>
 </body>
