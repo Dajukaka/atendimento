@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Guanabara Atendimento</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: white; text-align: center; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 10px; }
+        button { height: 70px; border-radius: 10px; border: none; background: #f39c12; color: black; font-weight: bold; font-size: 1.2em; }
+        button:active { background: white; transform: scale(0.9); }
+    </style>
+</head>
+<body>
+    <h1>GUANABARA</h1>
+    <p>Selecione sua máquina</p>
+    <div class="grid" id="botoes"></div>
+
+    <script>
+        // CONFIGURAÇÃO DO SEU FIREBASE (Pegue no console do Google)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCJu0tGeJSMt-9HXRVT2Ijsdh-Z1NzJYmg",
+            databaseURL: "https://guanabara-atendimento-default-rtdb.firebaseio.com"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Criar os 85 botões
+        const grid = document.getElementById('botoes');
+        for (let i = 1; i <= 85; i++) {
+            let btn = document.createElement('button');
+            btn.innerText = i;
+            btn.onclick = () => enviarChamada(i);
+            grid.appendChild(btn);
+        }
+
+        function enviarChamada(num) {
+            database.ref('atendimento').set({
+                maquina: num,
+                timestamp: Date.now()
+            }).then(() => alert("Máquina " + num + " chamada!"));
+        }
+    </script>
+</body>
+</html>
