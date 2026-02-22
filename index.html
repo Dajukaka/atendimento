@@ -37,7 +37,7 @@
 
         button { 
             aspect-ratio: 1 / 1; border-radius: 15px; border: 2px solid #333; 
-            background: var(--card-bg); color: var(--primary); font-size: 40px; font-weight: 900; 
+            background: var(--card-bg); color: var(--primary); font-size: 45px; font-weight: 900; 
             cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             box-shadow: 0 10px 0 #000; display: flex; align-items: center; justify-content: center;
         }
@@ -87,13 +87,42 @@
         painel.appendChild(b);
     }
 
+    // --- SISTEMA DE ÁUDIO MELHORADO ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function tocarBipeForte() {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        
+        function emitirSom(tempoInicio, frequencia) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(frequencia, audioCtx.currentTime + tempoInicio);
+            
+            // VOLUME NO MÁXIMO (1.0)
+            gain.gain.setValueAtTime(0, audioCtx.currentTime + tempoInicio);
+            gain.gain.linearRampToValueAtTime(1.0, audioCtx.currentTime + tempoInicio + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + tempoInicio + 0.3);
+            
+            osc.start(audioCtx.currentTime + tempoInicio);
+            osc.stop(audioCtx.currentTime + tempoInicio + 0.3);
+        }
+
+        // Toca dois bipes (bipe-bipe) para chamar mais atenção
+        emitirSom(0, 880);      // Primeiro bipe
+        emitirSom(0.4, 880);    // Segundo bipe após 0.4s
+    }
+
     function enviarChamada(n) {
         const btn = document.getElementById('m-' + n);
         if (btn.classList.contains('aguardando')) return;
 
-        tocarBipe();
+        tocarBipeForte();
 
-        // Agora enviamos o TIMESTAMP de quando deve EXPIRAR (agora + 15 segundos)
         const tempoExpiracao = Date.now() + 15000;
         db.ref('fila/' + n).set({ 
             maquina: n, 
@@ -106,54 +135,33 @@
         setTimeout(() => { st.style.display = "none"; }, 3000);
     }
 
-    // LÓGICA DO TIMER UNIFICADA
-    // Esta função roda a cada 1 segundo em todos os aparelhos
+    // TIMER E SINCRONIZAÇÃO
     setInterval(() => {
         const agora = Date.now();
-        
         db.ref('fila').once('value', (snapshot) => {
             const fila = snapshot.val() || {};
-            
-            // Verifica cada item na fila do Firebase
             Object.keys(fila).forEach(key => {
-                const dados = fila[key];
-                // Se o tempo atual passou do tempo de expiração gravado no banco
-                if (agora > dados.expiraEm) {
-                    db.ref('fila/' + key).remove(); // Apaga do banco para todos
+                if (agora > fila[key].expiraEm) {
+                    db.ref('fila/' + key).remove();
                 }
             });
         });
 
-        // Atualiza Relógio Visual
         const d = new Date();
         document.getElementById('relogio').innerText = d.toLocaleTimeString('pt-BR');
     }, 1000);
 
-    // ESCUTAR MUDANÇAS (Para pintar os botões)
     db.ref('fila').on('value', (snapshot) => {
         const fila = snapshot.val() || {};
-        // Limpa tudo
         for (let i = 1; i <= 85; i++) {
             document.getElementById('m-' + i).classList.remove('aguardando');
         }
-        // Pinta apenas os ativos
         Object.keys(fila).forEach(key => {
             const num = fila[key].maquina;
             const btn = document.getElementById('m-' + num);
             if (btn) btn.classList.add('aguardando');
         });
     });
-
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function tocarBipe() {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-    }
 </script>
 </body>
 </html>
