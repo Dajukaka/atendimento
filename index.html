@@ -123,16 +123,16 @@
 
         tocarBipeForte();
 
-        const tempoExpiracao = Date.now() + 15000;
+        const tempoExpiracao = Date.now() + 20000;
         db.ref('fila/' + n).set({ 
             maquina: n, 
             expiraEm: tempoExpiracao 
         });
 
         const st = document.getElementById('status');
-        st.innerText = `MÁQUINA ${n} CHAMADA!`;
+        st.innerText = `MAQUINA ${n} CHAMADA!`;
         st.style.display = "block";
-        setTimeout(() => { st.style.display = "none"; }, 3000);
+        setTimeout(() => { st.style.display = "none"; }, 5000);
     }
 
     // TIMER E SINCRONIZAÇÃO
