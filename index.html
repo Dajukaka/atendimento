@@ -61,7 +61,6 @@
             z-index: 100; box-shadow: 0 5px 20px rgba(0,0,0,0.8); 
         }
 
-        /* RelÃ³gio para a TV */
         #relogio {
             position: fixed; bottom: 10px; right: 20px; color: #f39c12;
             font-size: 1.5em; font-family: monospace; background: rgba(0,0,0,0.5);
@@ -73,77 +72,103 @@
 
     <div id="status">ENVIADO!</div>
     <h1>GUANABARA</h1>
-    <p>TOQUE NO N&Uacute;MERO DA SUA M&Aacute;QUINA</p>
+    <p>TOQUE NO NÚMERO DA SUA MÁQUINA</p>
 
     <div class="grid" id="painel"></div>
     
     <div id="relogio">00:00:00</div>
+
 <script>
+    // Configuração do Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyCJu0tGeJSMt-9HXRVT2Ijsdh-Z1NzJYmg",
+        databaseURL: "https://guanabara-atendimento-default-rtdb.firebaseio.com"
+    };
 
-        const firebaseConfig = {
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-            apiKey: "AIzaSyCJu0tGeJSMt-9HXRVT2Ijsdh-Z1NzJYmg",
+    // 1. Criar os botões na tela
+    const painel = document.getElementById('painel');
+    for (let i = 1; i <= 85; i++) {
+        let b = document.createElement('button');
+        b.innerText = i;
+        b.id = "m-" + i;
+        b.onclick = () => enviarChamada(i);
+        painel.appendChild(b);
+    }
 
-            databaseURL: "https://guanabara-atendimento-default-rtdb.firebaseio.com/"
-  
-        };
-   ///
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+    // 2. Função para Enviar Chamada (Apenas escreve no Banco)
+    function enviarChamada(n) {
+        const btn = document.getElementById('m-' + n);
+        
+        // Se já estiver vermelho, não faz nada ao clicar de novo
+        if (btn.classList.contains('aguardando')) return;
 
-        // RelÃ³gio Digital
-        function atualizarRelogio() {
-            const agora = new Date();
-            const h = String(agora.getHours()).padStart(2, '0');
-            const m = String(agora.getMinutes()).padStart(2, '0');
-            const s = String(agora.getSeconds()).padStart(2, '0');
-            document.getElementById('relogio').innerText = `${h}:${m}:${s}`;
-        }
-        setInterval(atualizarRelogio, 1000);
+        tocarBipe();
 
-        // Gerador de Som
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function tocarBipe() {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.type = "sine"; osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-        }
+        // Salva no Firebase usando o número da máquina como ID único
+        const referencia = db.ref('fila/' + n);
+        referencia.set({ 
+            maquina: n, 
+            timestamp: Date.now() 
+        });
 
-        // Criar BotÃµes
-        const painel = document.getElementById('painel');
+        // Feedback visual de status
+        const st = document.getElementById('status');
+        st.innerHTML = "MÁQUINA " + n + " CHAMADA!";
+        st.style.display = "block";
+        setTimeout(() => { st.style.display = "none"; }, 3000);
+
+        // Remove do Firebase após 15 segundos
+        // Isso fará o botão voltar ao normal para TODOS automaticamente
+        setTimeout(() => {
+            referencia.remove();
+        }, 15000); 
+    }
+
+    // 3. ATUALIZAÇÃO EM TEMPO REAL (Ouvinte Global)
+    // Essa função detecta qualquer mudança no Firebase e aplica em todos os dispositivos
+    db.ref('fila').on('value', (snapshot) => {
+        const filaAtiva = snapshot.val() || {};
+
+        // Limpa o estado de todos os botões antes de atualizar
         for (let i = 1; i <= 85; i++) {
-            let b = document.createElement('button');
-            b.innerText = i;
-            b.id = "m-" + i;
-            b.onclick = () => enviarChamada(i);
-            painel.appendChild(b);
+            document.getElementById('m-' + i).classList.remove('aguardando');
         }
 
-        function enviarChamada(n) {
-            const btn = document.getElementById('m-' + n);
-            if (btn.classList.contains('aguardando')) return;
+        // Aplica a classe 'aguardando' apenas nos que estão no banco de dados agora
+        Object.keys(filaAtiva).forEach(chave => {
+            const maquinaNum = filaAtiva[chave].maquina;
+            const btn = document.getElementById('m-' + maquinaNum);
+            if (btn) {
+                btn.classList.add('aguardando');
+            }
+        });
+    });
 
-            tocarBipe();
-            btn.classList.add('aguardando');
+    // --- Funções de Utilidade ---
 
-            const referencia = db.ref('fila').push();
-            referencia.set({ maquina: n, timestamp: Date.now() });
+    function atualizarRelogio() {
+        const agora = new Date();
+        const h = String(agora.getHours()).padStart(2, '0');
+        const m = String(agora.getMinutes()).padStart(2, '0');
+        const s = String(agora.getSeconds()).padStart(2, '0');
+        document.getElementById('relogio').innerText = `${h}:${m}:${s}`;
+    }
+    setInterval(atualizarRelogio, 1000);
 
-            const st = document.getElementById('status');
-            st.innerHTML = "M&Aacute;QUINA " + n + " CHAMADA!";
-            st.style.display = "block";
-            setTimeout(() => { st.style.display = "none"; }, 3000);
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function tocarBipe() {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.type = "sine"; osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+    }
+</script>
 
-            setTimeout(() => {
-                btn.classList.remove('aguardando');
-                referencia.remove();
-            }, 15000); 
-        }
-    </script>
 </body>
-
 </html>
