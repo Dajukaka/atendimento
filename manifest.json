@@ -1,0 +1,9 @@
+{
+  "name": "Guanabara Atendimento",
+  "short_name": "Guanabara",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#f39c12",
+  "orientation": "landscape"
+}
