@@ -2,6 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Guanabara Atendimento</title>
     
@@ -9,43 +10,98 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <style>
-        body { font-family: sans-serif; background: #121212; color: #fff; text-align: center; margin: 0; padding: 20px; -webkit-tap-highlight-color: transparent; }
-        h1 { color: #f39c12; text-transform: uppercase; letter-spacing: 2px; margin: 10px 0; }
-        p { color: #888; font-size: 14px; margin-bottom: 20px; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #121212; 
+            color: #fff; 
+            margin: 0; 
+            padding: 20px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1 { color: #f39c12; text-transform: uppercase; letter-spacing: 3px; margin: 10px 0; font-size: 2.5em; }
+        p { color: #888; margin-bottom: 20px; font-weight: bold; }
         
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 12px; max-width: 500px; margin: 0 auto; }
+        .grid { 
+            display: grid; 
+            gap: 12px; 
+            width: 100%; 
+            max-width: 1400px; 
+            grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); 
+            margin-bottom: 80px;
+        }
+
+        /* Ajuste para TV/Monitores Horizontais */
+        @media (min-width: 900px) {
+            .grid { grid-template-columns: repeat(10, 1fr); gap: 15px; }
+            button { height: 90px !important; font-size: 30px !important; }
+            h1 { font-size: 4em; }
+        }
+
+        button { 
+            height: 75px; border-radius: 12px; border: none; background: #222; 
+            color: #f39c12; font-size: 22px; font-weight: bold; 
+            box-shadow: 0 5px #000; cursor: pointer; transition: 0.2s; 
+        }
         
-        /* Botão Normal */
-        button { height: 75px; border-radius: 15px; border: none; background: #222; color: #f39c12; font-size: 22px; font-weight: bold; box-shadow: 0 4px #000; cursor: pointer; transition: 0.3s; }
+        button.aguardando { 
+            background: #e74c3c !important; color: #fff !important; 
+            transform: translateY(4px); box-shadow: 0 0 20px #e74c3c; 
+            border: 3px solid #fff; animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
         
-        /* Botão em Atendimento (Vermelho) */
-        button.aguardando { background: #e74c3c !important; color: #fff !important; transform: translateY(4px); box-shadow: 0 0 15px #e74c3c; border: 2px solid #fff; }
-        
-        #status { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); background: #27ae60; padding: 10px 20px; border-radius: 30px; display: none; font-weight: bold; z-index: 100; white-space: nowrap; }
+        #status { 
+            position: fixed; top: 20px; background: #27ae60; padding: 15px 40px; 
+            border-radius: 50px; display: none; font-weight: bold; font-size: 1.3em; 
+            z-index: 100; box-shadow: 0 5px 20px rgba(0,0,0,0.8); 
+        }
+
+        /* Relógio para a TV */
+        #relogio {
+            position: fixed; bottom: 10px; right: 20px; color: #f39c12;
+            font-size: 1.5em; font-family: monospace; background: rgba(0,0,0,0.5);
+            padding: 5px 15px; border-radius: 10px;
+        }
     </style>
 </head>
 <body>
 
-    <div id="status">CHAMADO ENVIADO!</div>
+    <div id="status">ENVIADO!</div>
     <h1>GUANABARA</h1>
-    <p>Selecione a m&aacute;quina para atendimento</p>
+    <p>TOQUE NO N&Uacute;MERO DA SUA M&Aacute;QUINA</p>
 
     <div class="grid" id="painel"></div>
-
-
-///endereço firebase
-  <script>
+    
+    <div id="relogio">00:00:00</div>
+<script>
 
         const firebaseConfig = {
 
             apiKey: "AIzaSyCJu0tGeJSMt-9HXRVT2Ijsdh-Z1NzJYmg",
 
             databaseURL: "https://guanabara-atendimento-default-rtdb.firebaseio.com"
+  
         };
+   ///
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Gerador de Som (Bipe)
+        // Relógio Digital
+        function atualizarRelogio() {
+            const agora = new Date();
+            const h = String(agora.getHours()).padStart(2, '0');
+            const m = String(agora.getMinutes()).padStart(2, '0');
+            const s = String(agora.getSeconds()).padStart(2, '0');
+            document.getElementById('relogio').innerText = `${h}:${m}:${s}`;
+        }
+        setInterval(atualizarRelogio, 1000);
+
+        // Gerador de Som
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function tocarBipe() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -57,7 +113,7 @@
             osc.start(); osc.stop(audioCtx.currentTime + 0.1);
         }
 
-        // Criar os 85 Botões
+        // Criar Botões
         const painel = document.getElementById('painel');
         for (let i = 1; i <= 85; i++) {
             let b = document.createElement('button');
@@ -69,33 +125,22 @@
 
         function enviarChamada(n) {
             const btn = document.getElementById('m-' + n);
-            
-            // Impede cliques repetidos enquanto estiver vermelho
             if (btn.classList.contains('aguardando')) return;
 
             tocarBipe();
             btn.classList.add('aguardando');
 
-            // 1. Envia para a FILA no Firebase criando um ID único
-            const referenciaChamada = db.ref('fila').push();
-            referenciaChamada.set({
-                maquina: n,
-                timestamp: Date.now()
-            });
+            const referencia = db.ref('fila').push();
+            referencia.set({ maquina: n, timestamp: Date.now() });
 
-            // 2. Mostra aviso visual no topo
             const st = document.getElementById('status');
-            st.innerText = "MÁQUINA " + n + " CHAMADA!";
+            st.innerHTML = "M&Aacute;QUINA " + n + " CHAMADA!";
             st.style.display = "block";
-            setTimeout(() => { st.style.display = "none"; }, 2500);
+            setTimeout(() => { st.style.display = "none"; }, 3000);
 
-            // 3. LIMPEZA AUTOMÁTICA (Após 15 segundos)
             setTimeout(() => {
-                // Remove a cor vermelha do botão no celular
                 btn.classList.remove('aguardando');
-                
-                // Apaga o registro do Firebase automaticamente
-                referenciaChamada.remove();
+                referencia.remove();
             }, 15000); 
         }
     </script>
