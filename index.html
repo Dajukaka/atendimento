@@ -1,46 +1,135 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>Guanabara Atendimento</title>
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
     <style>
-        body { font-family: sans-serif; background: #121212; color: white; text-align: center; padding: 20px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 10px; }
-        button { height: 70px; border-radius: 10px; border: none; background: #f39c12; color: black; font-weight: bold; font-size: 1.2em; }
-        button:active { background: white; transform: scale(0.9); }
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background: #121212; 
+            color: #fff; 
+            margin: 0; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        h1 { color: #f39c12; margin: 10px 0; font-size: 24px; text-transform: uppercase; letter-spacing: 2px; }
+        p { color: #888; margin-bottom: 25px; font-size: 14px; }
+
+        /* Grade de 85 Botıes */
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); 
+            gap: 12px; 
+            width: 100%; 
+            max-width: 500px; 
+            margin-bottom: 50px;
+        }
+
+        /* Estilo dos Botıes */
+        button { 
+            height: 65px; 
+            border: none; 
+            border-radius: 12px; 
+            background: #222; 
+            color: #f39c12; 
+            font-size: 20px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            box-shadow: 0 4px #000;
+        }
+
+        /* Bot„o quando selecionado */
+        button.selecionado { 
+            background: #f39c12 !important; 
+            color: #fff !important; 
+            transform: translateY(4px); 
+            box-shadow: 0 0 15px rgba(243, 156, 18, 0.7);
+            border: 2px solid #fff;
+        }
+
+        /* Alerta de confirmaÁ„o no topo */
+        #status { 
+            position: fixed; 
+            top: 20px; 
+            background: #27ae60; 
+            color: white; 
+            padding: 12px 25px; 
+            border-radius: 30px; 
+            display: none; 
+            font-weight: bold; 
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
     </style>
 </head>
 <body>
-    <h1>GUANABARA</h1>
-    <p>Selecione sua m√°quina</p>
-    <div class="grid" id="botoes"></div>
 
-    <script>
-        // CONFIGURA√á√ÉO DO SEU FIREBASE (Pegue no console do Google)
+    <div id="status">CHAMANDO...</div>
+
+    <h1>GUANABARA</h1>
+    <p>Toque no n&uacute;mero da sua m&aacute;quina</p>
+    
+    <audio id="somClique" src="https://www.soundjay.com/buttons/sounds/button-16.mp3" preload="auto"></audio>
+
+    <div class="grid" id="containerBotoes"></div>
+
+<script>
+
+        // CONFIGURA«√O DO SEU FIREBASE 
+
         const firebaseConfig = {
+
             apiKey: "AIzaSyCJu0tGeJSMt-9HXRVT2Ijsdh-Z1NzJYmg",
+
             databaseURL: "https://guanabara-atendimento-default-rtdb.firebaseio.com"
         };
+        
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Criar os 85 bot√µes
-        const grid = document.getElementById('botoes');
+        // Gerar os 85 botıes automaticamente
+        const grid = document.getElementById('containerBotoes');
         for (let i = 1; i <= 85; i++) {
             let btn = document.createElement('button');
             btn.innerText = i;
+            btn.id = "btn-" + i;
             btn.onclick = () => enviarChamada(i);
             grid.appendChild(btn);
         }
 
         function enviarChamada(num) {
+            // Tocar som
+            const audio = document.getElementById('somClique');
+            audio.currentTime = 0;
+            audio.play();
+
+            // Marcar visualmente o bot„o
+            document.querySelectorAll('button').forEach(b => b.classList.remove('selecionado'));
+            document.getElementById('btn-' + num).classList.add('selecionado');
+
+            // Mostrar aviso visual
+            const st = document.getElementById('status');
+            st.style.display = 'block';
+            st.innerText = 'M¡QUINA ' + num + ' CHAMADA!';
+            setTimeout(() => { st.style.display = 'none'; }, 2500);
+
+            // Enviar para o banco de dados
             database.ref('atendimento').set({
                 maquina: num,
                 timestamp: Date.now()
-            }).then(() => alert("M√°quina " + num + " chamada!"));
+            }).catch(err => alert("Erro: " + err.message));
         }
     </script>
 </body>
