@@ -3,57 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Guanabara Atendimento</title>
+    <title>Guanabara Atendimento - TV</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <style>
+        :root {
+            --primary: #f39c12;
+            --danger: #e74c3c;
+            --bg: #0a0a0a;
+            --card-bg: #1a1a1a;
+        }
+
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: #121212; color: #fff; margin: 0; padding: 20px; 
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background-color: var(--bg);
+            background-image: radial-gradient(circle at center, #1a1a1a 0%, #0a0a0a 100%);
+            color: #fff; 
+            margin: 0; 
+            padding: 40px 20px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 100vh;
+            overflow-x: hidden;
         }
-        h1 { color: #f39c12; text-transform: uppercase; letter-spacing: 3px; margin: 10px 0; font-size: 2.5em; }
-        p { color: #888; margin-bottom: 20px; font-weight: bold; }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 { 
+            color: var(--primary); 
+            text-transform: uppercase; 
+            letter-spacing: 8px; 
+            margin: 0; 
+            font-size: clamp(3em, 8vw, 6em); /* Tamanho responsivo */
+            text-shadow: 0 0 20px rgba(243, 156, 18, 0.3);
+        }
+
+        header p { 
+            color: #aaa; 
+            font-size: 1.5em; 
+            margin-top: 10px;
+            text-transform: uppercase;
+        }
+
         .grid { 
-            display: grid; gap: 12px; width: 100%; max-width: 1400px; 
-            grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); margin-bottom: 80px;
+            display: grid; 
+            gap: 20px; 
+            width: 100%; 
+            max-width: 1800px; 
+            /* Grid inteligente: ajusta colunas conforme o tamanho da tela */
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); 
+            margin-bottom: 100px;
         }
-        @media (min-width: 900px) {
-            .grid { grid-template-columns: repeat(10, 1fr); gap: 15px; }
-            button { height: 90px !important; font-size: 30px !important; }
-            h1 { font-size: 4em; }
-        }
+
         button { 
-            height: 75px; border-radius: 12px; border: none; background: #222; 
-            color: #f39c12; font-size: 22px; font-weight: bold; 
-            box-shadow: 0 5px #000; cursor: pointer; transition: 0.2s; 
+            aspect-ratio: 1 / 1; /* Botões sempre quadrados */
+            border-radius: 15px; 
+            border: 2px solid #333; 
+            background: var(--card-bg); 
+            color: var(--primary); 
+            font-size: 40px; 
+            font-weight: 900; 
+            cursor: pointer; 
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 0 #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+
+        button:active {
+            transform: translateY(5px);
+            box-shadow: 0 5px 0 #000;
+        }
+
+        /* ESTADO CHAMANDO */
         button.aguardando { 
-            background: #e74c3c !important; color: #fff !important; 
-            transform: translateY(4px); box-shadow: 0 0 20px #e74c3c; 
-            border: 3px solid #fff; animation: pulse 1s infinite;
+            background: var(--danger) !important; 
+            color: #fff !important; 
+            border-color: #fff;
+            transform: scale(1.05) translateY(5px); 
+            box-shadow: 0 0 40px var(--danger); 
+            animation: pulse 1s infinite alternate;
+            z-index: 10;
         }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+
+        @keyframes pulse { 
+            0% { filter: brightness(1); transform: scale(1.05); } 
+            100% { filter: brightness(1.3); transform: scale(1.1); } 
+        }
+
+        /* Feedback Flutuante */
         #status { 
-            position: fixed; top: 20px; background: #27ae60; padding: 15px 40px; 
-            border-radius: 50px; display: none; font-weight: bold; font-size: 1.3em; 
-            z-index: 100; box-shadow: 0 5px 20px rgba(0,0,0,0.8); 
+            position: fixed; 
+            top: 40px; 
+            background: #27ae60; 
+            padding: 20px 60px; 
+            border-radius: 100px; 
+            display: none; 
+            font-weight: bold; 
+            font-size: 2em; 
+            z-index: 1000; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 3px solid #fff;
+            animation: slideIn 0.5s ease-out;
         }
+
+        @keyframes slideIn {
+            from { transform: translateY(-100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Relógio Gigante para TV */
         #relogio {
-            position: fixed; bottom: 10px; right: 20px; color: #f39c12;
-            font-size: 1.5em; font-family: monospace; background: rgba(0,0,0,0.5);
-            padding: 5px 15px; border-radius: 10px;
+            position: fixed; 
+            bottom: 30px; 
+            right: 40px; 
+            color: var(--primary);
+            font-size: 3em; 
+            font-family: 'Courier New', monospace; 
+            background: rgba(0,0,0,0.8);
+            padding: 10px 30px; 
+            border-radius: 20px;
+            border: 1px solid #333;
+            box-shadow: 0 0 20px rgba(0,0,0,1);
+        }
+
+        /* Responsividade para telas MUITO grandes */
+        @media (min-width: 1600px) {
+            .grid {
+                grid-template-columns: repeat(10, 1fr); /* 10 por linha em monitores ultra-wide */
+            }
         }
     </style>
 </head>
 <body>
 
     <div id="status">ENVIADO!</div>
-    <h1>GUANABARA</h1>
-    <p>TOQUE NO NÚMERO DA SUA MÁQUINA</p>
+    
+    <header>
+        <h1>GUANABARA</h1>
+        <p>Painel de Atendimento em Tempo Real</p>
+    </header>
+
     <div class="grid" id="painel"></div>
+    
     <div id="relogio">00:00:00</div>
 
 <script>
@@ -65,7 +164,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Criar botões
+    // 1. Criar botões
     const painel = document.getElementById('painel');
     for (let i = 1; i <= 85; i++) {
         let b = document.createElement('button');
@@ -81,7 +180,6 @@
 
         tocarBipe();
 
-        // Salva no Firebase com a maquina como chave
         const ref = db.ref('fila/' + n);
         ref.set({ maquina: n, timestamp: Date.now() });
 
@@ -90,23 +188,22 @@
         st.style.display = "block";
         setTimeout(() => { st.style.display = "none"; }, 3000);
 
-        // O TIMER: Quem chamou é responsável por apagar do banco após 15s
-        // Como o banco é sincronizado, ao apagar aqui, apaga em todas as TVs
+        // Timer de 15 segundos para limpar
         setTimeout(() => {
             ref.remove();
         }, 15000); 
     }
 
-    // SINCRONIZAÇÃO EM TEMPO REAL PARA TODOS
+    // 2. SINCRONIZAÇÃO EM TEMPO REAL
     db.ref('fila').on('value', (snapshot) => {
         const fila = snapshot.val() || {};
         
-        // Reset visual de todos os botões
+        // Reset visual
         for (let i = 1; i <= 85; i++) {
             document.getElementById('m-' + i).classList.remove('aguardando');
         }
 
-        // Ativa apenas os que estão no banco
+        // Ativa botões do Firebase
         Object.keys(fila).forEach(key => {
             const num = fila[key].maquina;
             const btn = document.getElementById('m-' + num);
@@ -114,12 +211,13 @@
         });
     });
 
-    // Relógio e Som
+    // 3. Relógio
     setInterval(() => {
         const agora = new Date();
         document.getElementById('relogio').innerText = agora.toLocaleTimeString('pt-BR');
     }, 1000);
 
+    // 4. Som (Bipe)
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function tocarBipe() {
         if (audioCtx.state === 'suspended') audioCtx.resume();
