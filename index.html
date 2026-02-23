@@ -35,7 +35,7 @@
             padding: 20px; overflow-y: auto;
         }
 
-        /* HistÛrico Lateral */
+        /* Hist√≥rico Lateral */
         aside {
             width: var(--panel-width);
             background: rgba(20, 20, 20, 0.9);
@@ -56,7 +56,7 @@
 
         @keyframes slideIn { from { transform: translateX(50px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-        /* Grade de Botıes */
+        /* Grade de Bot√µes */
         .grid { 
             display: grid; gap: 15px; width: 100%; max-width: 1200px; 
             grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); 
@@ -93,7 +93,7 @@
     </main>
 
     <aside>
-        <h2>HIST”RICO</h2>
+        <h2>HIST√ìRICO</h2>
         <div id="lista-historico">
             </div>
     </aside>
@@ -114,13 +114,13 @@
         if ('speechSynthesis' in window) {
             const utterance = new SpeechSynthesisUtterance(texto);
             utterance.lang = 'pt-BR';
-            utterance.rate = 1.0; // Velocidade
+            utterance.rate = 2.0; // Velocidade
             utterance.pitch = 1.0; // Tom
             window.speechSynthesis.speak(utterance);
         }
     }
 
-    // Criar botıes
+    // Criar bot√µes
     const painel = document.getElementById('painel');
     for (let i = 1; i <= 85; i++) {
         let b = document.createElement('button');
@@ -134,7 +134,7 @@
         if (btn.classList.contains('aguardando')) return;
         
         // Voz e Registro
-        falar(`AtenÁ„o, m·quina ${n}`);
+        falar(`Aten√ß√£o, maquina ${n}`);
         
         db.ref('fila/' + n).set({ 
             maquina: n, 
@@ -143,13 +143,13 @@
         });
     }
 
-    // SINCRONIZA«√O E HIST”RICO
+    // SINCRONIZA√á√ÉO E HIST√ìRICO
     let historicoLocal = [];
 
     db.ref('fila').on('value', (snapshot) => {
         const fila = snapshot.val() || {};
         
-        // Atualiza botıes
+        // Atualiza bot√µes
         document.querySelectorAll('.maquina').forEach(b => b.classList.remove('aguardando'));
         
         Object.keys(fila).forEach(key => {
@@ -157,12 +157,12 @@
             const btn = document.getElementById('m-' + item.maquina);
             if (btn) btn.classList.add('aguardando');
 
-            // Adiciona ao histÛrico se for uma nova chamada
+            // Adiciona ao hist√≥rico se for uma nova chamada
             if (!historicoLocal.includes(key)) {
                 adicionarAoHistorico(item.maquina, item.hora);
                 historicoLocal.push(key);
                 // Tocar voz se a chamada veio de outro aparelho
-                falar(`M·quina ${item.maquina}`);
+                falar(`M√°quina ${item.maquina}`);
             }
         });
     });
@@ -171,11 +171,11 @@
         const lista = document.getElementById('lista-historico');
         const div = document.createElement('div');
         div.className = 'historico-item';
-        div.innerHTML = `<span>¿s ${hora}</span><strong>M¡QUINA ${num}</strong>`;
+        div.innerHTML = `<span>√Äs ${hora}</span><strong>M√ÅQUINA ${num}</strong>`;
         
         lista.insertBefore(div, lista.firstChild);
         
-        // MantÈm apenas os 5 ˙ltimos no visual
+        // Mant√©m apenas os 5 √∫ltimos no visual
         if (lista.children.length > 5) {
             lista.removeChild(lista.lastChild);
         }
@@ -193,10 +193,11 @@
         document.getElementById('relogio').innerText = new Date().toLocaleTimeString('pt-BR');
     }, 1000);
 
-    // Bot„o Tela Cheia
+    // Bot√£o Tela Cheia
     document.getElementById('btnFullscreen').onclick = () => {
         if (!document.fullscreenElement) document.documentElement.requestFullscreen();
     };
 </script>
 </body>
+
 </html>
