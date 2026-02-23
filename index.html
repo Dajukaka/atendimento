@@ -2,111 +2,33 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
     <title>Guanabara Atendimento Pro</title>
-    
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
     <style>
-        :root {
-            --primary: #f39c12;
-            --danger: #e74c3c;
-            --bg: #0a0a0a;
-            --card-bg: #1a1a1a;
-            --panel-width: 350px;
-        }
-
-        body { 
-            font-family: 'Segoe UI', Roboto, sans-serif; 
-            background-color: var(--bg);
-            background-image: radial-gradient(circle at center, #1a1a1a 0%, #0a0a0a 100%);
-            color: #fff; margin: 0; padding: 0; 
-            display: flex; height: 100vh; overflow: hidden;
-            flex-direction: row;
-        }
-
-        /* AJUSTE PARA CELULAR */
-        @media (max-width: 800px) {
-            body { flex-direction: column; overflow-y: auto; height: auto; }
-            aside { 
-                width: 100% !important; 
-                border-left: none !important; 
-                border-top: 3px solid var(--primary); 
-                min-height: 350px;
-            }
-            main { padding: 10px !important; overflow-y: visible !important; }
-            h1 { font-size: 2.8em !important; }
-            #relogio { font-size: 1.8em !important; bottom: 10px !important; left: 10px !important; }
-        }
-
-        /* CONTEÚDO PRINCIPAL (BOTÕES) */
-        main {
-            flex: 1;
-            display: flex; flex-direction: column; align-items: center;
-            padding: 20px; overflow-y: auto;
-        }
-
-        /* BARRA LATERAL (HISTÓRICO) */
-        aside {
-            width: var(--panel-width);
-            background: rgba(20, 20, 20, 0.95);
-            border-left: 3px solid var(--primary);
-            display: flex; flex-direction: column;
-            padding: 20px;
-            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
-            overflow-y: auto;
-        }
-
+        :root { --primary: #f39c12; --danger: #e74c3c; --bg: #0a0a0a; --card-bg: #1a1a1a; --panel-width: 350px; }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: var(--bg); background-image: radial-gradient(circle at center, #1a1a1a 0%, #0a0a0a 100%); color: #fff; margin: 0; padding: 0; display: flex; height: 100vh; overflow: hidden; flex-direction: row; }
+        @media (max-width: 800px) { body { flex-direction: column; overflow-y: auto; height: auto; } aside { width: 100% !important; border-left: none !important; border-top: 3px solid var(--primary); min-height: 350px; } main { padding: 10px !important; overflow-y: visible !important; } }
+        main { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; }
+        aside { width: var(--panel-width); background: rgba(20, 20, 20, 0.95); border-left: 3px solid var(--primary); display: flex; flex-direction: column; padding: 20px; box-shadow: -10px 0 30px rgba(0,0,0,0.5); overflow-y: auto; }
         h2 { color: var(--primary); text-transform: uppercase; font-size: 1.8em; border-bottom: 2px solid #333; padding-bottom: 15px; margin-top: 0; text-align: center; }
-
-        .historico-item {
-            background: #222; margin-bottom: 15px; padding: 18px;
-            border-radius: 12px; border-left: 8px solid var(--primary);
-            animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            transition: opacity 0.5s, transform 0.5s;
-        }
-
+        .historico-item { background: #222; margin-bottom: 15px; padding: 18px; border-radius: 12px; border-left: 8px solid var(--primary); animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: opacity 0.5s, transform 0.5s; }
         .fade-out { opacity: 0; transform: translateX(50px); }
         .historico-item span { display: block; color: var(--primary); font-size: 0.85em; font-weight: bold; margin-bottom: 4px; }
         .historico-item strong { font-size: 1.5em; color: #fff; display: block; }
-
         @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-
-        .grid { 
-            display: grid; gap: 12px; width: 100%; max-width: 1200px; 
-            grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); 
-            margin-top: 20px; margin-bottom: 40px;
-        }
-
-        button.maquina { 
-            aspect-ratio: 1 / 1; border-radius: 12px; border: 2px solid #333; 
-            background: var(--card-bg); color: var(--primary); font-size: 35px; font-weight: 900; 
-            cursor: pointer; transition: all 0.2s;
-            box-shadow: 0 5px 0 #000;
-        }
-
-        button.aguardando { 
-            background: var(--danger) !important; color: #fff !important; border-color: #fff;
-            transform: scale(1.08) translateY(5px); box-shadow: 0 0 30px var(--danger); 
-            animation: pulse 1s infinite alternate; z-index: 10;
-        }
-
+        .grid { display: grid; gap: 12px; width: 100%; max-width: 1200px; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); margin-top: 20px; margin-bottom: 40px; }
+        button.maquina { aspect-ratio: 1 / 1; border-radius: 12px; border: 2px solid #333; background: var(--card-bg); color: var(--primary); font-size: 35px; font-weight: 900; cursor: pointer; transition: all 0.2s; box-shadow: 0 5px 0 #000; }
+        button.aguardando { background: var(--danger) !important; color: #fff !important; border-color: #fff; transform: scale(1.08) translateY(5px); box-shadow: 0 0 30px var(--danger); animation: pulse 1s infinite alternate; z-index: 10; }
         @keyframes pulse { 0% { filter: brightness(1); } 100% { filter: brightness(1.4); } }
-
         #relogio { position: fixed; bottom: 20px; left: 20px; color: var(--primary); font-size: 2.5em; font-family: monospace; background: rgba(0,0,0,0.9); padding: 10px 20px; border-radius: 15px; border: 1px solid #444; z-index: 99; }
-
-        #btnFullscreen { position: absolute; top: 15px; left: 15px; background: #444; color: #fff; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; z-index: 100; opacity: 0.6; }
-        #btnFullscreen:hover { opacity: 1; }
+        #btnStart { position: absolute; top: 15px; left: 15px; background: var(--primary); color: #000; border: none; padding: 15px 25px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; z-index: 1000; box-shadow: 0 0 20px rgba(243,156,18,0.6); }
     </style>
 </head>
 <body>
 
-    <button id="btnFullscreen">TELA CHEIA</button>
+    <button id="btnStart">ATIVAR SISTEMA (SOM + TELA CHEIA)</button>
 
     <main>
         <h1 style="color: var(--primary); letter-spacing: 6px; margin: 10px 0; font-size: clamp(2.5em, 5vw, 4.5em); text-align: center; text-shadow: 0 0 15px rgba(243,156,18,0.4);">GUANABARA</h1>
@@ -121,38 +43,42 @@
     <div id="relogio">00:00:00</div>
 
 <script>
-    // CONFIGURAÇÃO FIREBASE
-    const firebaseConfig = {
-        apiKey: "AIzaSyCJu0tGeJSMt-9HXRVT2Ijsdh-Z1NzJYmg",
-        databaseURL: "https://guanabara-atendimento-default-rtdb.firebaseio.com"
-    };
-
+    const firebaseConfig = { apiKey: "AIzaSyCJu0tGeJSMt-9HXRVT2Ijsdh-Z1NzJYmg", databaseURL: "https://guanabara-atendimento-default-rtdb.firebaseio.com" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // SISTEMA DE VOZ COM DELAY DE 1.5s
-    function falar(texto) {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel(); // Para qualquer fala anterior
-
-            // Aguarda 1.5 segundos antes de começar a falar
-            setTimeout(() => {
-                const utterance = new SpeechSynthesisUtterance(texto);
-                const voces = window.speechSynthesis.getVoices();
-                const vozBrasil = voces.find(v => v.lang === 'pt-BR' || v.lang === 'pt_BR');
-                
-                if (vozBrasil) utterance.voice = vozBrasil;
-                utterance.lang = 'pt-BR';
-                utterance.rate = 0.9; 
-                window.speechSynthesis.speak(utterance);
-            }, 1500); 
-        }
+    function tocarBeep() {
+        try {
+            const context = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = context.createOscillator();
+            const gainNode = context.createGain();
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(880, context.currentTime); 
+            gainNode.gain.setValueAtTime(0, context.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.6, context.currentTime + 0.1);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.5);
+            oscillator.connect(gainNode);
+            gainNode.connect(context.destination);
+            oscillator.start();
+            oscillator.stop(context.currentTime + 0.5);
+        } catch (e) { console.error(e); }
     }
 
-    // Carregar vozes para o navegador
-    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+    function falar(texto) {
+        if (!('speechSynthesis' in window)) return;
+        tocarBeep();
+        setTimeout(() => {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(texto);
+            const voces = window.speechSynthesis.getVoices();
+            const vozBrasil = voces.find(v => v.lang.includes('pt-BR'));
+            if (vozBrasil) utterance.voice = vozBrasil;
+            utterance.lang = 'pt-BR';
+            utterance.rate = 0.85; 
+            window.speechSynthesis.speak(utterance);
+        }, 800); 
+    }
 
-    // Geração dos 85 botões
     const painel = document.getElementById('painel');
     for (let i = 1; i <= 85; i++) {
         let b = document.createElement('button');
@@ -161,33 +87,20 @@
         painel.appendChild(b);
     }
 
-    // Função ao clicar na máquina
     function enviarChamada(n) {
         const btn = document.getElementById('m-' + n);
         if (btn.classList.contains('aguardando')) return;
-        
-        db.ref('fila/' + n).set({ 
-            maquina: n, 
-            expiraEm: Date.now() + 15000,
-            hora: new Date().toLocaleTimeString('pt-BR')
-        });
+        db.ref('fila/' + n).set({ maquina: n, expiraEm: Date.now() + 15000, hora: new Date().toLocaleTimeString('pt-BR') });
     }
 
     let historicoLocal = [];
-
-    // OUVINTE EM TEMPO REAL
     db.ref('fila').on('value', (snapshot) => {
         const fila = snapshot.val() || {};
-        
-        // Reset visual de todos
         document.querySelectorAll('.maquina').forEach(b => b.classList.remove('aguardando'));
-        
         Object.keys(fila).forEach(key => {
             const item = fila[key];
             const btn = document.getElementById('m-' + item.maquina);
             if (btn) btn.classList.add('aguardando');
-
-            // Verifica se é uma nova chamada para o histórico e voz
             const idChamada = item.maquina + "_" + item.expiraEm;
             if (!historicoLocal.includes(idChamada)) {
                 adicionarAoHistorico(item.maquina, item.hora);
@@ -197,43 +110,36 @@
         });
     });
 
-    // FUNÇÃO DO HISTÓRICO COM TIMER DE 28s
     function adicionarAoHistorico(num, hora) {
         const lista = document.getElementById('lista-historico');
         const div = document.createElement('div');
         div.className = 'historico-item';
         div.innerHTML = `<span>ÀS ${hora}</span><strong>MÁQUINA ${num}</strong>`;
-        
         lista.insertBefore(div, lista.firstChild);
-
-        // Timer de 28 segundos para limpar o item do histórico lateral
-        setTimeout(() => {
-            div.classList.add('fade-out');
-            setTimeout(() => { if (div.parentNode === lista) lista.removeChild(div); }, 500);
-        }, 28000); 
-
-        // Limite de segurança para não travar o navegador
-        if (lista.children.length > 10) lista.removeChild(lista.lastChild);
+        setTimeout(() => { div.classList.add('fade-out'); setTimeout(() => { if (div.parentNode === lista) lista.removeChild(div); }, 500); }, 28000); 
     }
 
-    // LIMPEZA AUTOMÁTICA DO FIREBASE E RELÓGIO
     setInterval(() => {
         const agora = Date.now();
         db.ref('fila').once('value', (snapshot) => {
             const fila = snapshot.val() || {};
-            Object.keys(fila).forEach(key => {
-                if (agora > fila[key].expiraEm) db.ref('fila/' + key).remove();
-            });
+            Object.keys(fila).forEach(key => { if (agora > fila[key].expiraEm) db.ref('fila/' + key).remove(); });
         });
         document.getElementById('relogio').innerText = new Date().toLocaleTimeString('pt-BR');
     }, 1000);
 
-    // TELA CHEIA
-    document.getElementById('btnFullscreen').onclick = () => {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
-            document.getElementById('btnFullscreen').style.display = 'none';
-        }
+    // BOTÃO DE ATIVAÇÃO MELHORADO
+    document.getElementById('btnStart').onclick = function() {
+        tocarBeep();
+        
+        // Tenta tela cheia com todos os prefixos de navegadores
+        const doc = document.documentElement;
+        if (doc.requestFullscreen) doc.requestFullscreen();
+        else if (doc.webkitRequestFullScreen) doc.webkitRequestFullScreen();
+        else if (doc.mozRequestFullScreen) doc.mozRequestFullScreen();
+        else if (doc.msRequestFullscreen) doc.msRequestFullscreen();
+
+        this.style.display = 'none';
     };
 </script>
 </body>
