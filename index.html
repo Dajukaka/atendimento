@@ -26,6 +26,21 @@
             background-image: radial-gradient(circle at center, #1a1a1a 0%, #0a0a0a 100%);
             color: #fff; margin: 0; padding: 0; 
             display: flex; height: 100vh; overflow: hidden;
+            flex-direction: row; /* Padrão PC/TV */
+        }
+
+        /* Ajuste para Celular */
+        @media (max-width: 800px) {
+            body { flex-direction: column; overflow-y: auto; height: auto; }
+            aside { 
+                width: 100% !important; 
+                border-left: none !important; 
+                border-top: 3px solid var(--primary); 
+                min-height: 300px;
+            }
+            main { padding: 10px !important; overflow-y: visible !important; }
+            h1 { font-size: 2.5em !important; }
+            #relogio { font-size: 1.5em !important; bottom: 10px !important; left: 10px !important; }
         }
 
         main {
@@ -41,12 +56,13 @@
             display: flex; flex-direction: column;
             padding: 20px;
             box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+            overflow-y: auto;
         }
 
         h2 { color: var(--primary); text-transform: uppercase; font-size: 1.8em; border-bottom: 2px solid #333; padding-bottom: 15px; margin-top: 0; text-align: center; }
 
         .historico-item {
-            background: #222; margin-bottom: 15px; padding: 20px;
+            background: #222; margin-bottom: 15px; padding: 15px;
             border-radius: 12px; border-left: 8px solid var(--primary);
             animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
@@ -54,36 +70,36 @@
         }
 
         .fade-out { opacity: 0; transform: translateX(50px); }
-
-        .historico-item span { display: block; color: #f39c12; font-size: 0.9em; font-weight: bold; margin-bottom: 5px; }
-        .historico-item strong { font-size: 1.6em; color: #fff; display: block; }
+        .historico-item span { display: block; color: #f39c12; font-size: 0.8em; font-weight: bold; }
+        .historico-item strong { font-size: 1.4em; color: #fff; display: block; }
 
         @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
         .grid { 
-            display: grid; gap: 15px; width: 100%; max-width: 1200px; 
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); 
+            display: grid; gap: 10px; width: 100%; max-width: 1200px; 
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); 
             margin-top: 20px;
+            margin-bottom: 20px;
         }
 
         button.maquina { 
-            aspect-ratio: 1 / 1; border-radius: 15px; border: 2px solid #333; 
-            background: var(--card-bg); color: var(--primary); font-size: 40px; font-weight: 900; 
-            cursor: pointer; transition: all 0.3s;
-            box-shadow: 0 6px 0 #000;
+            aspect-ratio: 1 / 1; border-radius: 12px; border: 2px solid #333; 
+            background: var(--card-bg); color: var(--primary); font-size: 30px; font-weight: 900; 
+            cursor: pointer; transition: all 0.2s;
+            box-shadow: 0 5px 0 #000;
         }
 
         button.aguardando { 
             background: var(--danger) !important; color: #fff !important; border-color: #fff;
-            transform: scale(1.1) translateY(5px); box-shadow: 0 0 40px var(--danger); 
+            transform: scale(1.05); box-shadow: 0 0 25px var(--danger); 
             animation: pulse 1s infinite alternate; z-index: 10;
         }
 
         @keyframes pulse { 0% { filter: brightness(1); } 100% { filter: brightness(1.4); } }
 
-        #relogio { position: fixed; bottom: 20px; left: 20px; color: var(--primary); font-size: 2.5em; font-family: monospace; background: rgba(0,0,0,0.9); padding: 10px 25px; border-radius: 15px; border: 1px solid #444; }
+        #relogio { position: fixed; bottom: 20px; left: 20px; color: var(--primary); font-size: 2.5em; font-family: monospace; background: rgba(0,0,0,0.9); padding: 10px 20px; border-radius: 15px; border: 1px solid #444; z-index: 99; }
 
-        #btnFullscreen { position: absolute; top: 15px; left: 15px; background: #444; color: #fff; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; z-index: 100; }
+        #btnFullscreen { position: absolute; top: 15px; left: 15px; background: #444; color: #fff; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 10px; z-index: 100; }
     </style>
 </head>
 <body>
@@ -91,7 +107,7 @@
     <button id="btnFullscreen">TELA CHEIA</button>
 
     <main>
-        <h1 style="color: var(--primary); letter-spacing: 10px; margin: 10px 0; font-size: 4em; text-shadow: 0 0 15px rgba(243,156,18,0.4);">GUANABARA</h1>
+        <h1 style="color: var(--primary); letter-spacing: 5px; margin: 10px 0; font-size: 3.5em; text-align: center;">GUANABARA</h1>
         <div class="grid" id="painel"></div>
     </main>
 
@@ -119,7 +135,7 @@
             const vozBrasil = voces.find(v => v.lang === 'pt-BR' || v.lang === 'pt_BR');
             if (vozBrasil) utterance.voice = vozBrasil;
             utterance.lang = 'pt-BR';
-            utterance.rate = 0.9;
+            utterance.rate = 0.95;
             window.speechSynthesis.speak(utterance);
         }
     }
@@ -137,7 +153,6 @@
     function enviarChamada(n) {
         const btn = document.getElementById('m-' + n);
         if (btn.classList.contains('aguardando')) return;
-        
         db.ref('fila/' + n).set({ 
             maquina: n, 
             expiraEm: Date.now() + 15000,
@@ -156,7 +171,6 @@
             const btn = document.getElementById('m-' + item.maquina);
             if (btn) btn.classList.add('aguardando');
 
-            // ID único baseado na máquina e timestamp para não repetir no histórico
             const idChamada = item.maquina + "_" + item.expiraEm;
             if (!historicoLocal.includes(idChamada)) {
                 adicionarAoHistorico(item.maquina, item.hora);
@@ -174,17 +188,12 @@
         
         lista.insertBefore(div, lista.firstChild);
 
-        // TIMER DE LIMPEZA DO HISTÓRICO (28 SEGUNDOS)
         setTimeout(() => {
-            div.classList.add('fade-out'); // Inicia animação de saída
-            setTimeout(() => {
-                if (div.parentNode === lista) {
-                    lista.removeChild(div);
-                }
-            }, 500); // Espera a animação de fade acabar para remover do HTML
+            div.classList.add('fade-out');
+            setTimeout(() => { if (div.parentNode === lista) lista.removeChild(div); }, 500);
         }, 28000); 
 
-        if (lista.children.length > 8) lista.removeChild(lista.lastChild);
+        if (lista.children.length > 10) lista.removeChild(lista.lastChild);
     }
 
     setInterval(() => {
