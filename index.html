@@ -10,41 +10,45 @@
         :root { 
             --primary: #f39c12; 
             --danger: #e74c3c; 
-            --bg: #000000; /* Preto absoluto para sumir com barras */
-            --card-bg: #1a1a1a; 
-            --panel-width: 350px; 
+            --bg: #000000; 
+            --card-bg: #111111; 
+            --panel-width: 380px; 
         }
 
-        /* RESET TOTAL PARA REMOVER BARRAS BRANCAS */
+        /* Bloqueio de barras brancas e rolagem indesejada */
         html, body { 
             background-color: var(--bg); 
             margin: 0; 
             padding: 0; 
             width: 100%; 
             height: 100%; 
-            overflow: hidden; /* Impede qualquer rolagem e barra branca */
+            overflow: hidden; 
+            color: #fff;
         }
 
         body { 
-            font-family: 'Segoe UI', Roboto, sans-serif; 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
             display: flex; 
             flex-direction: row; 
         }
 
+        /* Área dos botões */
         main { 
             flex: 1; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            padding: 10px; 
-            overflow-y: auto; /* Rolagem apenas na área dos botões se necessário */
+            padding: 15px; 
+            overflow-y: auto; 
             height: 100vh;
+            box-sizing: border-box;
         }
 
+        /* Histórico lateral */
         aside { 
             width: var(--panel-width); 
-            background: #0a0a0a; 
-            border-left: 3px solid var(--primary); 
+            background: #050505; 
+            border-left: 4px solid var(--primary); 
             display: flex; 
             flex-direction: column; 
             padding: 20px; 
@@ -52,56 +56,59 @@
             box-sizing: border-box;
         }
 
-        h2 { color: var(--primary); text-transform: uppercase; font-size: 1.5em; border-bottom: 2px solid #333; padding-bottom: 10px; margin: 0 0 15px 0; text-align: center; }
+        h1 { color: var(--primary); margin: 5px 0 15px 0; font-size: 3.5em; letter-spacing: 4px; }
+        h2 { color: var(--primary); text-transform: uppercase; font-size: 1.8em; border-bottom: 2px solid #222; padding-bottom: 10px; margin-bottom: 20px; text-align: center; }
 
         .historico-item { 
-            background: #151515; margin-bottom: 12px; padding: 15px; border-radius: 8px; 
-            border-left: 6px solid var(--primary); animation: slideIn 0.3s ease-out;
+            background: #1a1a1a; margin-bottom: 15px; padding: 18px; border-radius: 10px; 
+            border-left: 8px solid var(--primary); animation: slideIn 0.3s ease-out;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
 
         .fade-out { opacity: 0; transform: translateX(50px); }
-        .historico-item span { display: block; color: var(--primary); font-size: 0.8em; font-weight: bold; }
-        .historico-item strong { font-size: 1.3em; color: #fff; display: block; }
+        .historico-item span { display: block; color: var(--primary); font-size: 0.9em; font-weight: bold; }
+        .historico-item strong { font-size: 1.6em; color: #fff; display: block; margin-top: 5px; }
 
         @keyframes slideIn { from { transform: translateX(50px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
         .grid { 
             display: grid; 
-            gap: 10px; 
+            gap: 12px; 
             width: 100%; 
-            max-width: 100%; 
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); 
-            padding-bottom: 50px; /* Espaço extra para não encostar no fundo */
+            grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); 
+            padding-bottom: 60px;
         }
 
         button.maquina { 
-            aspect-ratio: 1 / 1; border-radius: 10px; border: 1px solid #333; 
-            background: var(--card-bg); color: var(--primary); font-size: 28px; font-weight: 900; 
-            cursor: pointer; transition: all 0.2s; 
+            aspect-ratio: 1 / 1; border-radius: 12px; border: 2px solid #222; 
+            background: var(--card-bg); color: var(--primary); font-size: 32px; font-weight: 900; 
+            cursor: pointer; transition: transform 0.1s; 
         }
 
         button.aguardando { 
             background: var(--danger) !important; color: #fff !important; 
-            box-shadow: 0 0 20px var(--danger); animation: pulse 1s infinite alternate; 
+            border-color: #fff; box-shadow: 0 0 30px var(--danger); 
+            animation: pulse 0.8s infinite alternate; 
         }
 
-        @keyframes pulse { 0% { filter: brightness(1); } 100% { filter: brightness(1.5); } }
+        @keyframes pulse { 0% { transform: scale(1); filter: brightness(1); } 100% { transform: scale(1.05); filter: brightness(1.6); } }
 
-        #relogio { position: fixed; bottom: 15px; left: 15px; color: var(--primary); font-size: 2em; font-family: monospace; background: rgba(0,0,0,0.8); padding: 5px 15px; border-radius: 10px; border: 1px solid #333; }
+        #relogio { position: fixed; bottom: 20px; left: 20px; color: var(--primary); font-size: 2.5em; font-family: monospace; background: rgba(0,0,0,0.9); padding: 10px 20px; border-radius: 12px; border: 1px solid #333; }
 
+        /* Botão de sobreposição para habilitar som */
         #btnStart { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(243,156,18,0.9); color: #000; border: none; 
-            cursor: pointer; font-size: 2em; font-weight: bold; z-index: 9999; 
+            background: var(--primary); color: #000; border: none; 
+            cursor: pointer; font-size: 2.5em; font-weight: bold; z-index: 9999; 
         }
     </style>
 </head>
 <body>
 
-    <button id="btnStart">CLIQUE AQUI PARA INICIAR O PAINEL<br><small>(Ativar Som e Tela Cheia)</small></button>
+    <button id="btnStart">TOQUE NA TELA PARA INICIAR<br><small>(Habilitar Som Máximo + Fullscreen)</small></button>
 
     <main>
-        <h1 style="color: var(--primary); margin: 10px 0; font-size: 3em; text-align: center;">GUANABARA</h1>
+        <h1>GUANABARA</h1>
         <div class="grid" id="painel"></div>
     </main>
 
@@ -113,67 +120,93 @@
     <div id="relogio">00:00:00</div>
 
 <script>
-    const firebaseConfig = { apiKey: "AIzaSyCJu0tGeJSMt-9HXRVT2Ijsdh-Z1NzJYmg", databaseURL: "https://guanabara-atendimento-default-rtdb.firebaseio.com" };
+    // CONFIGURAÇÃO FIREBASE
+    const firebaseConfig = { 
+        apiKey: "AIzaSyCJu0tGeJSMt-9HXRVT2Ijsdh-Z1NzJYmg", 
+        databaseURL: "https://guanabara-atendimento-default-rtdb.firebaseio.com" 
+    };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // FUNÇÃO DE BEEP TURBINADA (SOM MAIS ALTO E TIPO QUADRADA)
     function tocarBeep() {
         try {
             const context = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = context.createOscillator();
-            const gainNode = context.createGain();
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(880, context.currentTime); 
-            gainNode.gain.setValueAtTime(0, context.currentTime);
-            gainNode.gain.linearRampToValueAtTime(0.5, context.currentTime + 0.1);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.5);
-            oscillator.connect(gainNode);
-            gainNode.connect(context.destination);
-            oscillator.start();
-            oscillator.stop(context.currentTime + 0.5);
-        } catch (e) { console.log(e); }
+            
+            const emitir = (delay) => {
+                const oscillator = context.createOscillator();
+                const gainNode = context.createGain();
+                
+                oscillator.type = 'square'; // Som mais potente
+                oscillator.frequency.setValueAtTime(700, context.currentTime + delay); 
+                
+                gainNode.gain.setValueAtTime(1.0, context.currentTime + delay); // Volume Máximo
+                gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + delay + 0.4);
+
+                oscillator.connect(gainNode);
+                gainNode.connect(context.destination);
+                oscillator.start(context.currentTime + delay);
+                oscillator.stop(context.currentTime + delay + 0.4);
+            };
+
+            emitir(0);      // Primeiro beep
+            emitir(0.2);    // Segundo beep (duplo)
+        } catch (e) { console.log("Erro som:", e); }
     }
 
+    // FUNÇÃO DE FALA PERSISTENTE
     function falar(texto) {
         if (!('speechSynthesis' in window)) return;
-        tocarBeep();
         
-        const falarAgora = () => {
+        tocarBeep();
+
+        const tentarFalar = () => {
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(texto);
             const voces = window.speechSynthesis.getVoices();
             const vozBrasil = voces.find(v => v.lang.includes('pt-BR'));
+            
             if (vozBrasil) utterance.voice = vozBrasil;
             utterance.lang = 'pt-BR';
-            utterance.rate = 0.9; 
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
             window.speechSynthesis.speak(utterance);
         };
 
+        // Delay para carregar vozes na TV Box
         if (window.speechSynthesis.getVoices().length === 0) {
-            window.speechSynthesis.onvoiceschanged = falarAgora;
+            window.speechSynthesis.onvoiceschanged = tentarFalar;
         } else {
-            setTimeout(falarAgora, 700);
+            setTimeout(tentarFalar, 800);
         }
     }
 
+    // Gerar Máquinas
     const painel = document.getElementById('painel');
     for (let i = 1; i <= 85; i++) {
         let b = document.createElement('button');
         b.innerText = i; b.id = "m-" + i; b.className = "maquina";
         b.onclick = () => {
-            db.ref('fila/' + i).set({ maquina: i, expiraEm: Date.now() + 15000, hora: new Date().toLocaleTimeString('pt-BR') });
+            db.ref('fila/' + i).set({ 
+                maquina: i, 
+                expiraEm: Date.now() + 15000, 
+                hora: new Date().toLocaleTimeString('pt-BR') 
+            });
         };
         painel.appendChild(b);
     }
 
+    // Ouvinte Firebase
     let historicoLocal = [];
     db.ref('fila').on('value', (snapshot) => {
         const fila = snapshot.val() || {};
         document.querySelectorAll('.maquina').forEach(b => b.classList.remove('aguardando'));
+        
         Object.keys(fila).forEach(key => {
             const item = fila[key];
             const btn = document.getElementById('m-' + item.maquina);
             if (btn) btn.classList.add('aguardando');
+
             const idChamada = item.maquina + "_" + item.expiraEm;
             if (!historicoLocal.includes(idChamada)) {
                 adicionarAoHistorico(item.maquina, item.hora);
@@ -189,25 +222,33 @@
         div.className = 'historico-item';
         div.innerHTML = `<span>ÀS ${hora}</span><strong>MÁQUINA ${num}</strong>`;
         lista.insertBefore(div, lista.firstChild);
-        setTimeout(() => { div.classList.add('fade-out'); setTimeout(() => { if (div.parentNode === lista) lista.removeChild(div); }, 500); }, 28000); 
+        setTimeout(() => {
+            div.classList.add('fade-out');
+            setTimeout(() => { if (div.parentNode === lista) lista.removeChild(div); }, 500);
+        }, 28000); 
     }
 
+    // Limpeza de expirados e Relógio
     setInterval(() => {
         const agora = Date.now();
         db.ref('fila').once('value', (snapshot) => {
             const fila = snapshot.val() || {};
-            Object.keys(fila).forEach(key => { if (agora > fila[key].expiraEm) db.ref('fila/' + key).remove(); });
+            Object.keys(fila).forEach(key => {
+                if (agora > fila[key].expiraEm) db.ref('fila/' + key).remove();
+            });
         });
         document.getElementById('relogio').innerText = new Date().toLocaleTimeString('pt-BR');
     }, 1000);
 
-    // BOTAO DE INICIALIZAÇÃO OCUPANDO A TELA TODA PARA GARANTIR O CLIQUE
+    // Botão de Start para liberar áudio e Fullscreen
     document.getElementById('btnStart').onclick = function() {
-        tocarBeep();
+        tocarBeep(); 
         const doc = document.documentElement;
         if (doc.requestFullscreen) doc.requestFullscreen();
         else if (doc.webkitRequestFullScreen) doc.webkitRequestFullScreen();
-        this.style.display = 'none';
+        else if (doc.mozRequestFullScreen) doc.mozRequestFullScreen();
+        
+        this.style.display = 'none'; // Some e revela o painel
     };
 </script>
 </body>
