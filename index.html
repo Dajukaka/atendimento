@@ -20,14 +20,13 @@
     <p class="instrucao">Aguardando sinais do ESP32 via Firebase...</p>
 
     <script>
-        // --- COLE SUAS CONFIGURAÇÕES DO FIREBASE AQUI ---
+        // CONFIGURAÇÃO DO SEU FIREBASE (Pegue no console do Google)
         const firebaseConfig = {
-            apiKey: "SUA_API_KEY",
-            databaseURL: "https://seu-projeto.firebaseio.com",
-            projectId: "seu-projeto",
+            apiKey: "AIzaSyCJu0tGeJSMt-9HXRVT2Ijsdh-Z1NzJYmg",
+            databaseURL: "https://guanabara-atendimento-default-rtdb.firebaseio.com"
         };
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        const database = firebase.database();
 
         // Tabela de De-Para (Código do Controle : Número da Máquina)
         const maquinas = {
@@ -58,4 +57,5 @@ db.ref('atendimento').on('value', (snapshot) => {
     </script>
 </body>
 </html>
+
 
