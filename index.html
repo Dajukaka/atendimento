@@ -8,44 +8,141 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <style>
-        body { background: #000; color: #ffcc00; font-family: 'Arial Black', sans-serif; margin: 0; display: flex; height: 100vh; width: 100vw; overflow: hidden; }
-        .main { flex: 4; display: flex; flex-direction: column; border-right: 3px solid #333; }
-        .sidebar { flex: 1.2; background: #0a0a0a; display: flex; flex-direction: column; min-width: 320px; }
-        .header { text-align: center; font-size: 3.5em; padding: 15px; color: #ffaa00; background: #111; letter-spacing: 5px; border-bottom: 2px solid #333; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; padding: 20px; overflow-y: auto; flex-grow: 1; }
-        
-        /* Estilo do Card (Quadrado Dourado/Vermelho) */
-        .card-chamada { background: #e74c3c; color: #fff; border-radius: 15px; height: 180px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 25px #e74c3c; border: 5px solid #fff; animation: entra 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        /* Estrutura Principal */
+        body { 
+            background: #000; 
+            color: #ffcc00; 
+            font-family: 'Arial Black', sans-serif; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: row; /* Alinha Main e Sidebar lado a lado */
+            height: 100vh; 
+            width: 100vw; 
+            overflow: hidden; 
+        }
+
+        /* Área da Esquerda (Guanabara e Cards) */
+        .main { 
+            flex: 1; /* Ocupa todo o espaço restante */
+            display: flex; 
+            flex-direction: column; 
+            border-right: 3px solid #333; 
+        }
+
+        /* Área da Direita (Histórico e Config) */
+        .sidebar { 
+            width: 350px; /* Largura fixa para a barra lateral */
+            background: #0a0a0a; 
+            display: flex; 
+            flex-direction: column; 
+        }
+
+        .header { 
+            text-align: center; 
+            font-size: 3.5em; 
+            padding: 15px; 
+            color: #ffaa00; 
+            background: #111; 
+            letter-spacing: 5px; 
+            border-bottom: 2px solid #333; 
+        }
+
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
+            gap: 20px; 
+            padding: 25px; 
+            overflow-y: auto; 
+            flex-grow: 1; 
+        }
+
+        /* Estilo do Card */
+        .card-chamada { 
+            background: #e74c3c; 
+            color: #fff; 
+            border-radius: 15px; 
+            height: 200px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            box-shadow: 0 0 25px #e74c3c; 
+            border: 5px solid #fff; 
+            animation: entra 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+
         .num-grande { font-size: 8em; line-height: 1; }
-        
-        .hist-header { background: #222; padding: 15px; text-align: center; font-size: 1.8em; color: #ffaa00; border-bottom: 3px solid #ffaa00; }
-        .hist-lista { padding: 10px; overflow-y: auto; flex-grow: 1; }
-        .hist-item { background: #1a1a1a; padding: 12px; margin-bottom: 8px; border-left: 6px solid #ffaa00; border-radius: 4px; color: #fff; }
-        
-        .menu-container { background: #111; padding: 15px; border-top: 2px solid #333; }
-        .btn-config { width: 100%; padding: 15px; background: #333; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 1.1em; }
+
+        /* Estilo Sidebar */
+        .hist-header { 
+            background: #222; 
+            padding: 15px; 
+            text-align: center; 
+            font-size: 1.8em; 
+            color: #ffaa00; 
+            border-bottom: 3px solid #ffaa00; 
+        }
+
+        .hist-lista { 
+            padding: 10px; 
+            overflow-y: auto; 
+            flex-grow: 1; 
+        }
+
+        .hist-item { 
+            background: #1a1a1a; 
+            padding: 12px; 
+            margin-bottom: 10px; 
+            border-left: 6px solid #ffaa00; 
+            border-radius: 4px; 
+            color: #fff; 
+        }
+
+        /* Rodapé com Botão */
+        .menu-container { 
+            background: #111; 
+            padding: 20px; 
+            border-top: 2px solid #333; 
+        }
+
+        .btn-config { 
+            width: 100%; 
+            padding: 15px; 
+            background: #333; 
+            color: #fff; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 1.1em; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
         .btn-config:hover { background: #444; }
 
         @keyframes entra { from { transform: scale(0); } to { transform: scale(1); } }
         .blink { animation: blinker 1s linear infinite; }
-        @keyframes blinker { 50% { opacity: 0.7; } }
+        @keyframes blinker { 50% { opacity: 0.8; } }
     </style>
 </head>
 <body>
 
     <div class="main">
         <div class="header">GUANABARA</div>
-        <div class="grid" id="grid-dinamica">
-            </div>
+        <div id="grid-dinamica" class="grid"></div>
     </div>
 
     <div class="sidebar">
         <div class="hist-header">HISTÓRICO</div>
-        <div class="hist-lista" id="lista-historico">
-            </div>
+        <div id="lista-historico" class="hist-lista"></div>
         
         <div class="menu-container">
-            <button class="btn-config" onclick="alert('Menu de Configurações em breve!')">⚙️ CONFIGURAÇÕES</button>
+            <button class="btn-config" onclick="alert('Configurações do Firebase em breve!')">
+                <span>⚙️</span> CONFIGURAÇÕES
+            </button>
         </div>
     </div>
 
@@ -62,154 +159,43 @@
         db.ref('atendimento').on('value', (snapshot) => {
             const dados = snapshot.val();
             if (dados && dados.maquina) {
-                const id = dados.maquina;
-
-                // Evita duplicar se a mesma máquina for clicada várias vezes seguidas no mesmo segundo
-                exibirChamada(id);
+                adicionarCard(dados.maquina);
             }
         });
 
-        function exibirChamada(id) {
-            // Se já estiver na tela, não faz nada
+        function adicionarCard(id) {
             if (chamadasAtivas.has(id)) return;
 
-            // 1. Toca o Som
+            // Áudio
             const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-            audio.play().catch(e => console.log("Clique na tela para habilitar áudio"));
+            audio.play().catch(() => {});
 
-            // 2. Adiciona o Card na Grid
+            // Inserir Card
             const grid = document.getElementById('grid-dinamica');
             const card = document.createElement('div');
             card.className = 'card-chamada blink';
             card.id = 'card-' + id;
-            card.innerHTML = `<span>MÁQUINA</span><span class="num-grande">${id}</span>`;
+            card.innerHTML = `<span style="font-size:1.5em">MÁQUINA</span><span class="num-grande">${id}</span>`;
             grid.prepend(card);
 
-            // 3. Adiciona no Histórico lateral
+            // Inserir Histórico
             const lista = document.getElementById('lista-historico');
             const item = document.createElement('div');
             item.className = 'hist-item';
             item.innerHTML = `<small>${new Date().toLocaleTimeString()}</small><div>MAQ. ${id}</div>`;
             lista.prepend(item);
 
-            // 4. Marca como ativa e remove após 45 segundos (igual ao código original)
             chamadasAtivas.add(id);
+            
+            // Remove card após 45 seg
             setTimeout(() => {
-                const elemento = document.getElementById('card-' + id);
-                if (elemento) elemento.remove();
+                const el = document.getElementById('card-' + id);
+                if (el) el.remove();
                 chamadasAtivas.delete(id);
             }, 45000);
         }
 
-        // Clique inicial para liberar áudio no navegador
-        document.body.onclick = () => console.log("Áudio liberado");
-    </script>
-</body>
-</html><!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Guanabara Cloud</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-    <style>
-        body { background: #000; color: #ffcc00; font-family: 'Arial Black', sans-serif; margin: 0; display: flex; height: 100vh; width: 100vw; overflow: hidden; }
-        .main { flex: 4; display: flex; flex-direction: column; border-right: 3px solid #333; }
-        .sidebar { flex: 1.2; background: #0a0a0a; display: flex; flex-direction: column; min-width: 320px; }
-        .header { text-align: center; font-size: 3.5em; padding: 15px; color: #ffaa00; background: #111; letter-spacing: 5px; border-bottom: 2px solid #333; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; padding: 20px; overflow-y: auto; flex-grow: 1; }
-        
-        /* Estilo do Card (Quadrado Dourado/Vermelho) */
-        .card-chamada { background: #e74c3c; color: #fff; border-radius: 15px; height: 180px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 25px #e74c3c; border: 5px solid #fff; animation: entra 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .num-grande { font-size: 8em; line-height: 1; }
-        
-        .hist-header { background: #222; padding: 15px; text-align: center; font-size: 1.8em; color: #ffaa00; border-bottom: 3px solid #ffaa00; }
-        .hist-lista { padding: 10px; overflow-y: auto; flex-grow: 1; }
-        .hist-item { background: #1a1a1a; padding: 12px; margin-bottom: 8px; border-left: 6px solid #ffaa00; border-radius: 4px; color: #fff; }
-        
-        .menu-container { background: #111; padding: 15px; border-top: 2px solid #333; }
-        .btn-config { width: 100%; padding: 15px; background: #333; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 1.1em; }
-        .btn-config:hover { background: #444; }
-
-        @keyframes entra { from { transform: scale(0); } to { transform: scale(1); } }
-        .blink { animation: blinker 1s linear infinite; }
-        @keyframes blinker { 50% { opacity: 0.7; } }
-    </style>
-</head>
-<body>
-
-    <div class="main">
-        <div class="header">GUANABARA</div>
-        <div class="grid" id="grid-dinamica">
-            </div>
-    </div>
-
-    <div class="sidebar">
-        <div class="hist-header">HISTÓRICO</div>
-        <div class="hist-lista" id="lista-historico">
-            </div>
-        
-        <div class="menu-container">
-            <button class="btn-config" onclick="alert('Menu de Configurações em breve!')">⚙️ CONFIGURAÇÕES</button>
-        </div>
-    </div>
-
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCJu0tGeJSMt-9HXRVT2Ijsdh-Z1NzJYmg",
-            databaseURL: "https://guanabara-atendimento-default-rtdb.firebaseio.com"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        let chamadasAtivas = new Set();
-
-        db.ref('atendimento').on('value', (snapshot) => {
-            const dados = snapshot.val();
-            if (dados && dados.maquina) {
-                const id = dados.maquina;
-
-                // Evita duplicar se a mesma máquina for clicada várias vezes seguidas no mesmo segundo
-                exibirChamada(id);
-            }
-        });
-
-        function exibirChamada(id) {
-            // Se já estiver na tela, não faz nada
-            if (chamadasAtivas.has(id)) return;
-
-            // 1. Toca o Som
-            const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-            audio.play().catch(e => console.log("Clique na tela para habilitar áudio"));
-
-            // 2. Adiciona o Card na Grid
-            const grid = document.getElementById('grid-dinamica');
-            const card = document.createElement('div');
-            card.className = 'card-chamada blink';
-            card.id = 'card-' + id;
-            card.innerHTML = `<span>MÁQUINA</span><span class="num-grande">${id}</span>`;
-            grid.prepend(card);
-
-            // 3. Adiciona no Histórico lateral
-            const lista = document.getElementById('lista-historico');
-            const item = document.createElement('div');
-            item.className = 'hist-item';
-            item.innerHTML = `<small>${new Date().toLocaleTimeString()}</small><div>MAQ. ${id}</div>`;
-            lista.prepend(item);
-
-            // 4. Marca como ativa e remove após 45 segundos (igual ao código original)
-            chamadasAtivas.add(id);
-            setTimeout(() => {
-                const elemento = document.getElementById('card-' + id);
-                if (elemento) elemento.remove();
-                chamadasAtivas.delete(id);
-            }, 45000);
-        }
-
-        // Clique inicial para liberar áudio no navegador
-        document.body.onclick = () => console.log("Áudio liberado");
+        document.body.onclick = () => console.log("Som ativado");
     </script>
 </body>
 </html>
