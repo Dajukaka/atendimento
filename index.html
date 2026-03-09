@@ -20,42 +20,37 @@
     <p class="instrucao">Aguardando sinais do ESP32 via Firebase...</p>
 
     <script>
-        // CONFIGURAÇÃO DO SEU FIREBASE (Pegue no console do Google)
+        // CONFIGURAÇÃO DO SEU FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyCJu0tGeJSMt-9HXRVT2Ijsdh-Z1NzJYmg",
             databaseURL: "https://guanabara-atendimento-default-rtdb.firebaseio.com"
         };
+        
         firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        
+        // Mudei para "db" para combinar com o resto do código
+        const db = firebase.database();
 
-        // Tabela de De-Para (Código do Controle : Número da Máquina)
-        const maquinas = {
-            "1234567": 1,
-            "9876543": 2,
-            "5554443": 3
-        };
+        // Escuta mudanças no nó "atendimento" conforme seu print
+        db.ref('atendimento').on('value', (snapshot) => {
+            const dados = snapshot.val();
+            console.log("Dados recebidos:", dados); // Isso ajuda a ver se chegou algo no F12
 
-        // Escuta mudanças no Firebase em tempo real
-      // O seu print mostra que os dados estão dentro de "atendimento"
-db.ref('atendimento').on('value', (snapshot) => {
-    const dados = snapshot.val();
-    if (dados && dados.maquina) {
-        // Exibe o número que está lá no Firebase (neste caso, o 6)
-        document.getElementById('num-maq').innerText = dados.maquina;
-        document.getElementById('alerta').style.display = 'block';
+            if (dados && dados.maquina) {
+                // Atualiza o número na tela
+                document.getElementById('num-maq').innerText = dados.maquina;
+                document.getElementById('alerta').style.display = 'block';
 
-        // Toca o som de alerta
-        const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-        audio.play();
+                // Som de alerta
+                const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+                audio.play().catch(e => console.log("Interaja com a página para o som funcionar"));
 
-        // Esconde após 30 segundos
-        setTimeout(() => {
-            document.getElementById('alerta').style.display = 'none';
-        }, 30000);
-    }
-});
+                // Esconde após 30 segundos
+                setTimeout(() => {
+                    document.getElementById('alerta').style.display = 'none';
+                }, 30000);
+            }
+        });
     </script>
 </body>
 </html>
-
-
