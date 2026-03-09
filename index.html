@@ -37,25 +37,25 @@
         };
 
         // Escuta mudanças no Firebase em tempo real
-        db.ref('painel/chamadaAtual').on('value', (snapshot) => {
-            const dados = snapshot.val();
-            if (dados) {
-                const idMaquina = maquinas[dados.codigo] || "Desconhecida";
-                
-                // Mostra o alerta na tela
-                document.getElementById('num-maq').innerText = idMaquina;
-                document.getElementById('alerta').style.display = 'block';
+      // O seu print mostra que os dados estão dentro de "atendimento"
+db.ref('atendimento').on('value', (snapshot) => {
+    const dados = snapshot.val();
+    if (dados && dados.maquina) {
+        // Exibe o número que está lá no Firebase (neste caso, o 6)
+        document.getElementById('num-maq').innerText = dados.maquina;
+        document.getElementById('alerta').style.display = 'block';
 
-                // Toca um som (opcional)
-                const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-                audio.play();
+        // Toca o som de alerta
+        const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+        audio.play();
 
-                // Esconde o alerta após 30 segundos
-                setTimeout(() => {
-                    document.getElementById('alerta').style.display = 'none';
-                }, 30000);
-            }
-        });
+        // Esconde após 30 segundos
+        setTimeout(() => {
+            document.getElementById('alerta').style.display = 'none';
+        }, 30000);
+    }
+});
     </script>
 </body>
 </html>
+
