@@ -8,120 +8,29 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <style>
-        /* Estrutura Principal */
-        body { 
-            background: #000; 
-            color: #ffcc00; 
-            font-family: 'Arial Black', sans-serif; 
-            margin: 0; 
-            display: flex; 
-            flex-direction: row; /* Alinha Main e Sidebar lado a lado */
-            height: 100vh; 
-            width: 100vw; 
-            overflow: hidden; 
-        }
-
-        /* Área da Esquerda (Guanabara e Cards) */
-        .main { 
-            flex: 1; /* Ocupa todo o espaço restante */
-            display: flex; 
-            flex-direction: column; 
-            border-right: 3px solid #333; 
-        }
-
-        /* Área da Direita (Histórico e Config) */
-        .sidebar { 
-            width: 350px; /* Largura fixa para a barra lateral */
-            background: #0a0a0a; 
-            display: flex; 
-            flex-direction: column; 
-        }
-
-        .header { 
-            text-align: center; 
-            font-size: 3.5em; 
-            padding: 15px; 
-            color: #ffaa00; 
-            background: #111; 
-            letter-spacing: 5px; 
-            border-bottom: 2px solid #333; 
-        }
-
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
-            gap: 20px; 
-            padding: 25px; 
-            overflow-y: auto; 
-            flex-grow: 1; 
-        }
-
+        body { background: #000; color: #ffcc00; font-family: 'Arial Black', sans-serif; margin: 0; display: flex; height: 100vh; width: 100vw; overflow: hidden; }
+        .main { flex: 1; display: flex; flex-direction: column; border-right: 3px solid #333; }
+        .sidebar { width: 350px; background: #0a0a0a; display: flex; flex-direction: column; }
+        .header { text-align: center; font-size: 3.5em; padding: 15px; color: #ffaa00; background: #111; letter-spacing: 5px; border-bottom: 2px solid #333; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; padding: 25px; overflow-y: auto; flex-grow: 1; }
+        
         /* Estilo do Card */
-        .card-chamada { 
-            background: #e74c3c; 
-            color: #fff; 
-            border-radius: 15px; 
-            height: 200px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            box-shadow: 0 0 25px #e74c3c; 
-            border: 5px solid #fff; 
-            animation: entra 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-        }
-
+        .card-chamada { background: #e74c3c; color: #fff; border-radius: 15px; height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 25px #e74c3c; border: 5px solid #fff; animation: entra 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .num-grande { font-size: 8em; line-height: 1; }
 
-        /* Estilo Sidebar */
-        .hist-header { 
-            background: #222; 
-            padding: 15px; 
-            text-align: center; 
-            font-size: 1.8em; 
-            color: #ffaa00; 
-            border-bottom: 3px solid #ffaa00; 
-        }
+        .hist-header { background: #222; padding: 15px; text-align: center; font-size: 1.8em; color: #ffaa00; border-bottom: 3px solid #ffaa00; }
+        .hist-lista { padding: 10px; overflow-y: auto; flex-grow: 1; }
+        .hist-item { background: #1a1a1a; padding: 12px; margin-bottom: 10px; border-left: 6px solid #ffaa00; border-radius: 4px; color: #fff; }
+        
+        .menu-container { background: #111; padding: 20px; border-top: 2px solid #333; }
+        .btn-config { width: 100%; padding: 15px; background: #333; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1.1em; }
 
-        .hist-lista { 
-            padding: 10px; 
-            overflow-y: auto; 
-            flex-grow: 1; 
-        }
-
-        .hist-item { 
-            background: #1a1a1a; 
-            padding: 12px; 
-            margin-bottom: 10px; 
-            border-left: 6px solid #ffaa00; 
-            border-radius: 4px; 
-            color: #fff; 
-        }
-
-        /* Rodapé com Botão */
-        .menu-container { 
-            background: #111; 
-            padding: 20px; 
-            border-top: 2px solid #333; 
-        }
-
-        .btn-config { 
-            width: 100%; 
-            padding: 15px; 
-            background: #333; 
-            color: #fff; 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            font-size: 1.1em; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .btn-config:hover { background: #444; }
+        /* Estilo da Janela de Configuração (Modal) */
+        #modalConfig { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); }
+        .modal-content { background: #222; margin: 10% auto; padding: 30px; border: 2px solid #ffaa00; width: 400px; border-radius: 15px; text-align: center; }
+        input { width: 80%; padding: 10px; margin: 10px 0; font-size: 1.2em; text-align: center; }
+        .btn-save { background: #27ae60; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-close { background: #c0392b; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; }
 
         @keyframes entra { from { transform: scale(0); } to { transform: scale(1); } }
         .blink { animation: blinker 1s linear infinite; }
@@ -138,11 +47,22 @@
     <div class="sidebar">
         <div class="hist-header">HISTÓRICO</div>
         <div id="lista-historico" class="hist-lista"></div>
-        
         <div class="menu-container">
-            <button class="btn-config" onclick="alert('Configurações do Firebase em breve!')">
-                <span>⚙️</span> CONFIGURAÇÕES
-            </button>
+            <button class="btn-config" onclick="abrirModal()">⚙️ CONFIGURAÇÕES</button>
+        </div>
+    </div>
+
+    <div id="modalConfig">
+        <div class="modal-content">
+            <h2 style="color:#ffaa00">CADASTRAR MÁQUINA</h2>
+            <p id="statusCadastro">Aguardando sinal da campainha...</p>
+            <div id="formCadastro" style="display:none">
+                <p>Código detectado: <b id="codigoCapturado"></b></p>
+                <input type="number" id="inputNumeroMaq" placeholder="Número da Máquina">
+                <br>
+                <button class="btn-save" onclick="salvarMaquina()">SALVAR</button>
+            </div>
+            <button class="btn-close" onclick="fecharModal()">CANCELAR</button>
         </div>
     </div>
 
@@ -155,22 +75,41 @@
         const db = firebase.database();
 
         let chamadasAtivas = new Set();
+        let modoCadastro = false;
+        let ultimoCodigoGeral = "";
+        let listaMaquinas = {};
 
+        // Carrega as máquinas já cadastradas do Firebase
+        db.ref('configuracoes/maquinas').on('value', (snap) => {
+            listaMaquinas = snap.val() || {};
+        });
+
+        // Escuta o sinal do ESP32 (ele deve enviar o código bruto do RF para 'atendimento/codigo')
         db.ref('atendimento').on('value', (snapshot) => {
             const dados = snapshot.val();
-            if (dados && dados.maquina) {
-                adicionarCard(dados.maquina);
+            if (!dados) return;
+
+            const codigoRF = dados.codigo;
+
+            if (modoCadastro) {
+                // Se estiver no modo cadastro, captura o código e libera o formulário
+                ultimoCodigoGeral = codigoRF;
+                document.getElementById('codigoCapturado').innerText = codigoRF;
+                document.getElementById('statusCadastro').innerText = "SINAL DETECTADO!";
+                document.getElementById('formCadastro').style.display = "block";
+            } else {
+                // Modo normal: Traduz código RF para número da máquina
+                const numMaq = listaMaquinas[codigoRF] || "S/N";
+                exibirChamada(numMaq);
             }
         });
 
-        function adicionarCard(id) {
-            if (chamadasAtivas.has(id)) return;
-
-            // Áudio
+        function exibirChamada(id) {
+            if (id === "S/N" || chamadasAtivas.has(id)) return;
+            
             const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
             audio.play().catch(() => {});
 
-            // Inserir Card
             const grid = document.getElementById('grid-dinamica');
             const card = document.createElement('div');
             card.className = 'card-chamada blink';
@@ -178,7 +117,6 @@
             card.innerHTML = `<span style="font-size:1.5em">MÁQUINA</span><span class="num-grande">${id}</span>`;
             grid.prepend(card);
 
-            // Inserir Histórico
             const lista = document.getElementById('lista-historico');
             const item = document.createElement('div');
             item.className = 'hist-item';
@@ -186,8 +124,6 @@
             lista.prepend(item);
 
             chamadasAtivas.add(id);
-            
-            // Remove card após 45 seg
             setTimeout(() => {
                 const el = document.getElementById('card-' + id);
                 if (el) el.remove();
@@ -195,7 +131,30 @@
             }, 45000);
         }
 
-        document.body.onclick = () => console.log("Som ativado");
+        // Funções do Modal
+        function abrirModal() {
+            modoCadastro = true;
+            document.getElementById('modalConfig').style.display = "block";
+            document.getElementById('statusCadastro').innerText = "Pressione a campainha agora...";
+            document.getElementById('formCadastro').style.display = "none";
+        }
+
+        function fecharModal() {
+            modoCadastro = false;
+            document.getElementById('modalConfig').style.display = "none";
+        }
+
+        function salvarMaquina() {
+            const num = document.getElementById('inputNumeroMaq').value;
+            if (num) {
+                // Salva no Firebase: códigoRF -> número da máquina
+                db.ref('configuracoes/maquinas/' + ultimoCodigoGeral).set(parseInt(num));
+                alert("Máquina " + num + " cadastrada com sucesso!");
+                fecharModal();
+            }
+        }
+
+        document.body.onclick = () => console.log("Som pronto");
     </script>
 </body>
 </html>
